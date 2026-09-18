@@ -57,6 +57,25 @@ Notes on how these were captured, so that later comparisons are made the same wa
   page. Its own behaviour is verified separately.
 - No horizontal overflow at the mobile width.
 
+## 2026-09-18 — Accepted difference: `.link-arrow` is 1.8 px wider
+
+The "Take a look inside →" link in the story section measures 158.1 px on the
+production site and 159.9 px on the migrated site, at 1280 px. This is a deliberate
+decision, not a regression, and a future comparison must not read it as one.
+
+The cause is the arrow. `→` (U+2192) is not in the `latin` subset of Hanken Grotesk,
+so **both** versions fall back to another font for that single character. They fall back
+differently: the production stack goes straight to `system-ui`, while `next/font` inserts
+a metrics-matched `Hanken Grotesk Fallback` family ahead of it, and that family's arrow
+is fractionally wider.
+
+Removing the synthetic fallback would recover the 1.8 px exactly. It was kept, because
+the fallback is what stops text reflowing when the webfont swaps in, and layout shift is
+a stated requirement while 1.8 px on one inline link is not perceptible.
+
+It is the only element on the page affected. The three decorative feature marks are fixed
+at 40 px by the stylesheet, and the hero's italic span matches to within 0.01 px.
+
 ## Finding: a script injected by the content delivery network
 
 `index.html` and `privacy.html` each end with a bot-detection script that Cloudflare
