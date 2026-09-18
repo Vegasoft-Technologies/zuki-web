@@ -88,8 +88,12 @@ opening hours must require editing only a file in `src/data/`.
 - `src/data/site.ts` is the single source of truth for the business name, address,
   telephone number, coordinates and social links. Anything appearing in more than one
   place is defined here and imported.
-- `src/data/menu.ts` holds all six menu categories. Prices are numbers, not strings, so
-  they can be sorted and formatted consistently.
+- `src/data/menu.ts` holds all six menu categories. A price is stored as the string the
+  menu prints, because a number cannot represent the eleven items that have no price, the
+  twenty-one that carry two or three (`£2.45 / £2.75`, `£5 / £7 / £25`) or a supplement
+  (`+£0.50`), and would render `£9` back as `£9.00`. Each priced item also carries
+  `amount`, the lowest figure in that string, which is what sorting and structured data
+  use.
 - Structured data for search engines is generated from these same files, so the markup
   can never drift from what the page displays.
 
@@ -98,12 +102,15 @@ See `docs/content-guide.md` for how to make content changes without touching com
 ## Rendering safety
 
 Any value that differs between the server render and the browser causes a hydration
-mismatch. Two such values exist in this project:
+mismatch. Three such values exist in this project:
 
 - **The current time**, used by the opening-status line. Render a neutral placeholder
   during the server render and compute the real value in an effect.
 - **`localStorage`**, used by the cookie banner. It does not exist on the server. Read it
   in an effect only.
+- **The current year**, in the footer copyright line. Render the sentence around it on
+  the server and fill only the year in an effect. Baking it into the static build would
+  freeze it and let it go stale each January.
 
 Never silence a hydration warning to make it disappear. Fix the cause.
 
@@ -138,8 +145,11 @@ The Google Maps embed loads only after the visitor clicks to load it.
 Before requesting a review, run these and confirm they pass:
 
     npm run lint
-    npx tsc --noEmit
     npm run build
+    npx tsc --noEmit
+
+The order matters. `npx tsc --noEmit` needs the route types that `npm run build`
+generates, so on a clean checkout it fails if it runs first.
 
 Then check the running site at 375px, 768px and 1280px:
 
