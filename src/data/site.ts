@@ -31,6 +31,12 @@ export const site = {
     tripadvisor:
       "https://www.tripadvisor.co.uk/Restaurant_Review-g186254-d15840655-Reviews-Zukis_Caffetteria-Exeter_Devon_England.html",
   },
+  /** The studio that builds and maintains the site. */
+  builder: {
+    name: "Vegasoft",
+    url: "https://vegasoft.co.uk",
+    domain: "vegasoft.co.uk",
+  },
   ordering: {
     deliveroo: "https://deliveroo.co.uk/menu/exeter/exeter-city-centre/zukis-caffetteria",
     justEat: "https://www.just-eat.co.uk/restaurants-zukis-caffetteria-exeter/menu",
