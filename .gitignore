@@ -1,11 +1,32 @@
+# dependencies
 node_modules/
+/.pnp
+.pnp.*
+
+# build output
 .next/
 out/
 dist/
+/build
+
+# testing
+/coverage
+
+# environment
 .env*
 !.env.example
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# misc
 .DS_Store
+*.pem
 *.log
+
+# deployment
+.vercel
 
 # Local tooling configuration — never commit
 CLAUDE.md
@@ -13,3 +34,4 @@ CLAUDE.md
 .cursor/
 .aider*
 .playwright-mcp/
+AGENTS.md

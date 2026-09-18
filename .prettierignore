@@ -1,0 +1,11 @@
+# The recovered production site is a byte-exact record of what the live server serves.
+# It is moved, never reformatted.
+reference/
+
+# Generated or vendored
+.next/
+out/
+build/
+coverage/
+node_modules/
+package-lock.json
