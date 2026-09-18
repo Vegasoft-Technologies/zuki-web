@@ -61,3 +61,7 @@ generates, so on a clean checkout it fails if it is run first.
 
 The figures the migrated site must not regress against are recorded in
 [`docs/baseline.md`](docs/baseline.md), together with the date each was measured.
+
+## Licence
+
+Proprietary. All rights reserved — see [`LICENSE`](LICENSE).
