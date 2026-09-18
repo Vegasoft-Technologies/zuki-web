@@ -20,7 +20,7 @@ because its audience is in Exeter, United Kingdom.
 - The subject line is imperative, at most 72 characters, with no trailing period.
 
   Good: `feat(menu): sort items by ascending price`
-  Bad:  `Updated the menu sorting and some other fixes`
+  Bad: `Updated the menu sorting and some other fixes`
 
 - One logical change per commit. If the subject line needs an "and", split the commit.
 - A commit carries exactly one author. Do not append trailers or footers to commit bodies.
