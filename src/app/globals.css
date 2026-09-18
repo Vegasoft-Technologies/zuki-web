@@ -836,3 +836,69 @@ a:focus-visible, button:focus-visible, .menu__tab:focus-visible {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* =========================================================
+   TOUCH TARGETS
+   Added after the migration; not part of the recovered stylesheet.
+
+   Every interactive control is given a hit area of at least 44 x 44 pixels.
+   Where the visible control is smaller than that, the area is widened with a
+   transparent pseudo-element instead of with padding, so that nothing a visitor
+   can see moves and the page still matches reference/screenshots.
+
+   Each expansion is sized against the measured gap to its neighbours, so no two
+   hit areas overlap. The pseudo-elements are absolutely positioned, which keeps
+   them out of flow and therefore out of the flex layouts they sit inside.
+   ========================================================= */
+.nav__toggle,
+.menu__tab,
+.btn--small,
+.link-arrow,
+.footer__links a,
+.gallery__more a,
+.map-embed__link {
+  position: relative;
+}
+
+.nav__toggle::after,
+.menu__tab::after,
+.btn--small::after,
+.link-arrow::after,
+.footer__links a::after,
+.gallery__more a::after,
+.map-embed__link::after {
+  content: "";
+  position: absolute;
+}
+
+/* 40 x 32 measured */
+.nav__toggle::after { inset: -6px -2px; }
+
+/* 41.2 high. Tabs wrap onto several rows only 7.5px apart, so 1.5px a side. */
+.menu__tab::after { inset: -1.5px 0; }
+
+/* 38.1 high. Covers "Book a table", "Show map" and both cookie buttons. */
+.btn--small::after { inset: -3px 0; }
+
+/* 30.1 high */
+.link-arrow::after { inset: -7px 0; }
+
+/* 26.1 high and 31.8 wide at the narrowest. Rows are 22.6px apart and columns
+   22.4px, so this stays clear of the neighbouring links. */
+.footer__links a::after { inset: -9px -7px; }
+
+/* 23.5 high */
+.gallery__more a::after { inset: -11px 0; }
+
+/* 22.8 high */
+.map-embed__link::after { inset: -11px 0; }
+
+/* The telephone and Instagram lines sit only 7.9px apart, so expanding them
+   transparently would make the two hit areas overlap. These two are raised with
+   padding instead, which is the one place in this change where something visible
+   moves: the "Get in touch" block grows taller. */
+.visit__block p > a[href^="tel:"],
+.visit__block p > a[href*="instagram"] {
+  display: inline-block;
+  padding-block: 0.75rem;
+}
