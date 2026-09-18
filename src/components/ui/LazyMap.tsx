@@ -1,12 +1,22 @@
+"use client";
+
+import { useState } from "react";
 import { site } from "@/data/site";
 
 /**
- * The map is a third-party embed, so it is never loaded until the visitor asks for it.
- * Until then only this placeholder is rendered.
+ * The map is a third-party embed from Google, so nothing is requested from it until
+ * the visitor asks. Until then only the placeholder is rendered, and the stylesheet
+ * hides that placeholder once the map has loaded.
  */
 export default function LazyMap() {
+  const [loaded, setLoaded] = useState(false);
+
   return (
-    <div className="map-embed" id="mapEmbed" data-src={site.maps.embed}>
+    <div
+      className={loaded ? "map-embed is-loaded" : "map-embed"}
+      id="mapEmbed"
+      data-src={site.maps.embed}
+    >
       <div className="map-embed__placeholder" id="mapPlaceholder">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path
@@ -15,7 +25,12 @@ export default function LazyMap() {
           />
         </svg>
         <p>The map loads from Google Maps, which may set cookies.</p>
-        <button className="btn btn--small btn--gold" id="mapLoadBtn" type="button">
+        <button
+          className="btn btn--small btn--gold"
+          id="mapLoadBtn"
+          type="button"
+          onClick={() => setLoaded(true)}
+        >
           Show map
         </button>
         <a
@@ -27,6 +42,15 @@ export default function LazyMap() {
           Open in Google Maps instead →
         </a>
       </div>
+
+      {loaded ? (
+        <iframe
+          src={site.maps.embed}
+          title="Map to Zuki's Caffetteria, 3B Queen Street, Exeter"
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
+      ) : null}
     </div>
   );
 }
