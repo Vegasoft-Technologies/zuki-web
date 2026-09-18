@@ -9,7 +9,18 @@ export interface MenuItem {
    * flavours, which are priced by the scoop on their group heading.
    */
   price?: string;
-  /** The lowest amount in `price`, in pounds, for sorting and structured data. */
+  /**
+   * The lowest amount in `price`, in pounds. Lowest, because that is what a range should
+   * sort by: a wine listed `£5 / £7 / £25` belongs with the five pound drinks, not the
+   * twenty-five pound ones.
+   *
+   * When a group is ordered by price, items with no `amount` sort last, after every
+   * priced item, keeping the order they are written in here. Eleven items have no price
+   * of their own and would otherwise have no defined position.
+   *
+   * Do not use a single item's `amount` for the `priceRange` in the structured data.
+   * That is derived from the lowest and the highest amount across the whole menu.
+   */
   amount?: number;
   description?: string;
   diet?: Diet[];
@@ -21,7 +32,14 @@ export interface MenuGroup {
   title: string;
   /** Printed small beside the title, such as the per-scoop prices for gelato. */
   hint?: string;
-  /** Which of the two columns the group sits in. */
+  /**
+   * Which of the two columns the group sits in.
+   *
+   * This describes content, not styling. The two columns hold different groups — the
+   * breakfast panel has "Breakfast & Brunch" on the left and "Local favourite" and
+   * "Sides" on the right — rather than one list reflowing into two. Which group belongs
+   * on which side is an editorial choice and cannot be derived, so it is recorded here.
+   */
   column: 1 | 2;
   /** The denser list used for the gelato flavours. */
   compact?: boolean;
