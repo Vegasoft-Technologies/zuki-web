@@ -27,7 +27,8 @@ export const site = {
   },
   social: {
     instagram: "https://www.instagram.com/zukiscaffetteria/",
-    facebook: "",
+    // Note the handle differs from the Instagram one; this is what the business uses.
+    facebook: "https://www.facebook.com/zukiscafetteria/",
     tripadvisor:
       "https://www.tripadvisor.co.uk/Restaurant_Review-g186254-d15840655-Reviews-Zukis_Caffetteria-Exeter_Devon_England.html",
   },
