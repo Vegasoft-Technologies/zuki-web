@@ -1,0 +1,27 @@
+name: Task
+description: A change to make, with the conditions for calling it done.
+labels: ["task"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What needs to change, and why it is worth doing.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Conditions that can be checked, not intentions.
+      placeholder: |
+        - [ ] Items within each group are ordered by ascending price
+        - [ ] Items with no price sort last, in their original order
+        - [ ] The rendered page still matches reference/screenshots at all three widths
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Constraints, prior decisions, or anything that would trip someone up.
