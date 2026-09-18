@@ -17,6 +17,14 @@ export const site = {
     latitude: 50.7259,
     longitude: -3.5318,
   },
+  maps: {
+    /** Opens Google Maps in a new tab. */
+    directions:
+      "https://www.google.com/maps/search/?api=1&query=Zuki%27s+Caffetteria+3B+Queen+St+Exeter+EX4+3SB",
+    /** The embedded map, loaded only once the visitor asks for it. */
+    embed:
+      "https://maps.google.com/maps?q=Zuki's%20Caffetteria%203B%20Queen%20Street%20Exeter%20EX4%203SB&z=16&output=embed",
+  },
   social: {
     instagram: "https://www.instagram.com/zukiscaffetteria/",
     facebook: "",
