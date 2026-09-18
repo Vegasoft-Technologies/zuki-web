@@ -3,7 +3,6 @@ import type { MenuCategory, MenuGroup } from "@/types/menu";
 
 interface MenuPanelProps {
   category: MenuCategory;
-  isActive: boolean;
 }
 
 function Group({ group, first }: { group: MenuGroup; first: boolean }) {
@@ -32,17 +31,19 @@ function Group({ group, first }: { group: MenuGroup; first: boolean }) {
   );
 }
 
-export default function MenuPanel({ category, isActive }: MenuPanelProps) {
+/**
+ * The contents of one category's panel. The wrapping `menu__panel` element belongs to
+ * `MenuTabs`, which owns the active state; keeping it there is what allows everything
+ * below to stay on the server.
+ */
+export default function MenuPanel({ category }: MenuPanelProps) {
   const columns: MenuGroup[][] = [
     category.groups.filter((g) => g.column === 1),
     category.groups.filter((g) => g.column === 2),
   ];
 
   return (
-    <div
-      className={isActive ? "menu__panel is-active" : "menu__panel"}
-      data-panel={category.id}
-    >
+    <>
       {category.note ? <p className="menu__panel-note">{category.note}</p> : null}
 
       <div className="menu__cols">
@@ -67,6 +68,6 @@ export default function MenuPanel({ category, isActive }: MenuPanelProps) {
           </p>
         </div>
       ) : null}
-    </div>
+    </>
   );
 }
