@@ -4,6 +4,7 @@ import { Fraunces, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "@/components/layout/SiteHeader";
 import SiteFooter from "@/components/layout/SiteFooter";
+import BookingBar from "@/components/layout/BookingBar";
 import CookieBanner from "@/components/ui/CookieBanner";
 import { buildStructuredData } from "@/lib/structuredData";
 
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         {children}
         <SiteFooter />
+        <BookingBar />
         <CookieBanner />
       </body>
     </html>
