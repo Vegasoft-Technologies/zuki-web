@@ -68,6 +68,20 @@ The script is preserved in `reference/` because that directory must stay byte-ex
 must not be carried into the migrated application: it is a third-party script that runs
 before any consent is given.
 
+### Effect on the request count
+
+The client's measured figure of 19 HTTP requests probably does not include this script.
+It is injected at the edge rather than written into the source, and it pulls in a further
+request of its own for `/cdn-cgi/challenge-platform/scripts/jsd/main.js`.
+
+Any deployment behind Cloudflare will have the script injected again, whether or not the
+application asks for it. Our own measurements will therefore show requests the client's
+original figure never counted. A comparison that ignores this will read as a regression
+we introduced, when nothing in the application changed. Always state whether a recorded
+measurement was taken behind Cloudflare, and compare like with like.
+
+### Effect on file comparison
+
 It also carries a token that changes on every request, so a freshly downloaded
 `index.html` never hashes the same as the stored copy. Comparing the two with that one
 line excluded gives an identical hash, which confirms the recovered copy is faithful to
