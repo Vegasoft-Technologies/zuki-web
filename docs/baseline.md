@@ -57,6 +57,58 @@ Notes on how these were captured, so that later comparisons are made the same wa
   page. Its own behaviour is verified separately.
 - No horizontal overflow at the mobile width.
 
+## 2026-09-18 — Mobile experience audit
+
+Every interactive element measured at 375 px, in a production build. "Hit area" is the
+control's own box unioned with the transparent overlay that widens it. The threshold is
+44 x 44 px.
+
+| Control                    | Visible size | Hit area before | Hit area after        |
+| -------------------------- | ------------ | --------------- | --------------------- |
+| Burger toggle              | 40.0 x 32.0  | 40.0 x 32.0     | **44.0 x 44.0**       |
+| Mobile menu link (5)       | 320.0 x 56.3 | 320.0 x 56.3    | 320.0 x 56.3          |
+| Menu tab (6)               | 170.9 x 41.2 | 170.9 x 41.2    | **170.9 x 44.2**      |
+| Order button (3)           | 320.0 x 53.9 | 320.0 x 53.9    | 320.0 x 53.9          |
+| Story "Take a look inside" | 151.4 x 30.1 | 151.4 x 30.1    | **151.4 x 44.1**      |
+| Gallery Instagram link     | 128.6 x 23.5 | 128.6 x 23.5    | **128.6 x 45.5**      |
+| Visit "Get directions"     | 124.4 x 30.1 | 124.4 x 30.1    | **124.4 x 44.1**      |
+| Visit telephone            | 127.1 x 21.5 | 127.1 x 21.5    | **127.1 x 50.1**      |
+| Visit Instagram            | 127.4 x 21.5 | 127.4 x 21.5    | **127.4 x 50.1**      |
+| "Show map"                 | 101.2 x 38.1 | 101.2 x 38.1    | **101.2 x 44.1**      |
+| "Open in Google Maps"      | 195.7 x 22.8 | 195.7 x 22.8    | **195.7 x 44.8**      |
+| Footer link (7, narrowest) | 39.0 x 26.1  | 31.8 x 26.1     | **53.0 x 44.1**       |
+| Vegasoft credit            | 320.0 x 64.2 | 320.0 x 64.2    | 320.0 x 64.2          |
+| Booking bar control        | 335.0 x 54.5 | did not exist   | **335.0 x 54.5**      |
+| Cookie button (2)          | 162.7 x 38.1 | 155.2 x 38.1    | **162.7 x 44.1**      |
+| Cookie policy link, inline | 151.7 x 19.0 | 151.7 x 19.0    | 151.7 x 19.0 — exempt |
+
+Fifteen of the sixteen groups meet 44 x 44. The exception is deliberate: the "Privacy &
+Cookie Policy" link sits inline in a sentence, where expanding it vertically would
+overlap the lines above and below. WCAG 2.5.8 exempts links inline in running text for
+exactly that reason.
+
+Almost all of the increases are transparent overlays rather than padding, so the
+controls look exactly as they did. The one visible change is in the "Get in touch"
+block, where the telephone and Instagram lines sit only 7.9 px apart and had to be
+spaced out: that block grew by 48 px, and every other section measures the same as
+before at both 375 px and 1280 px.
+
+**There is no horizontal scrolling at 375 px.** The document scroll width and the client
+width are both 375.
+
+### Other findings from the audit
+
+- **Scroll behind the open menu.** Holding the page works: the scroll position does not
+  move while the menu is open (1009 before and after a wheel gesture), it is restored on
+  close (700 to 1009 to 700), and nothing shifts sideways — the brand mark stays at
+  x 20 throughout. The section behind the menu stays at the same offset the whole time.
+- **Focus.** All 30 focusable elements show a visible focus ring when reached with the
+  keyboard. None was missing one.
+- **Stuck hover.** Tested in a touch-emulating browser reporting `hover: none` and
+  `pointer: coarse`. After tapping a menu tab, an order button and a footer link and
+  then tapping elsewhere, each returned to exactly the computed style of a sibling that
+  had never been touched. No hover state persists, so no change was needed.
+
 ## 2026-09-18 — Accepted difference: `.link-arrow` is 1.8 px wider
 
 The "Take a look inside →" link in the story section measures 158.1 px on the
