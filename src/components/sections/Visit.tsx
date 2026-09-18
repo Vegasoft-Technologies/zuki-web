@@ -1,4 +1,5 @@
 import Eyebrow from "@/components/ui/Eyebrow";
+import Reveal from "@/components/ui/Reveal";
 import SectionTitle from "@/components/ui/SectionTitle";
 import LazyMap from "@/components/ui/LazyMap";
 import { site } from "@/data/site";
@@ -9,7 +10,7 @@ export default function Visit() {
     <section className="visit" id="visit">
       <div className="visit__canopy" aria-hidden="true"></div>
       <div className="visit__grid">
-        <div className="visit__info reveal">
+        <Reveal className="visit__info">
           <Eyebrow>Come and see us</Eyebrow>
           <SectionTitle>Find your seat under the flowers.</SectionTitle>
 
@@ -52,11 +53,11 @@ export default function Visit() {
             <h3>Opening hours</h3>
             <OpeningHoursTable />
           </div>
-        </div>
+        </Reveal>
 
-        <div className="visit__map reveal">
+        <Reveal className="visit__map">
           <LazyMap />
-        </div>
+        </Reveal>
       </div>
     </section>
   );

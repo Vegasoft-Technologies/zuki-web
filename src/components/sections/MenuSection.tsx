@@ -1,4 +1,5 @@
 import Eyebrow from "@/components/ui/Eyebrow";
+import Reveal from "@/components/ui/Reveal";
 import SectionTitle from "@/components/ui/SectionTitle";
 import MenuPanel from "@/components/sections/MenuPanel";
 import { menu, menuAllergyNote } from "@/data/menu";
@@ -6,7 +7,7 @@ import { menu, menuAllergyNote } from "@/data/menu";
 export default function MenuSection() {
   return (
     <section className="menu" id="menu">
-      <div className="menu__head reveal">
+      <Reveal className="menu__head">
         <Eyebrow className="eyebrow--center">{"What's cooking"}</Eyebrow>
         <SectionTitle className="section-title--center">The menu</SectionTitle>
         <p className="menu__note">
@@ -16,7 +17,7 @@ export default function MenuSection() {
             <em className="mi__diet mi__diet--vg">Vg</em> vegan
           </span>
         </p>
-      </div>
+      </Reveal>
 
       <div className="menu__tabs" role="tablist" aria-label="Menu sections">
         {menu.map((category, index) => (

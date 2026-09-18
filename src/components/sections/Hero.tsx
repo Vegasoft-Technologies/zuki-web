@@ -2,6 +2,7 @@ import Image from "next/image";
 import logo from "../../../public/images/logo.png";
 import Button from "@/components/ui/Button";
 import Eyebrow from "@/components/ui/Eyebrow";
+import Reveal from "@/components/ui/Reveal";
 import OpeningStatus from "@/components/ui/OpeningStatus";
 
 export default function Hero() {
@@ -9,7 +10,7 @@ export default function Hero() {
     <section className="hero">
       <div className="hero__canopy" aria-hidden="true"></div>
 
-      <div className="hero__inner reveal">
+      <Reveal className="hero__inner">
         <Image src={logo} alt="Zuki's Caffetteria" className="hero__logo" priority />
         <Eyebrow className="eyebrow--center">
           {"Est. 2017  ·  Queen Street, Exeter"}
@@ -36,7 +37,7 @@ export default function Hero() {
         </div>
 
         <OpeningStatus />
-      </div>
+      </Reveal>
     </section>
   );
 }
