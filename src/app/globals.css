@@ -902,3 +902,45 @@ a:focus-visible, button:focus-visible, .menu__tab:focus-visible {
   display: inline-block;
   padding-block: 0.75rem;
 }
+
+/* =========================================================
+   BOOKING BAR
+   Added after the migration; not part of the recovered stylesheet.
+
+   The header's "Book a table" button is hidden below 921px, which left booking two
+   taps deep inside the burger menu on the device most visitors use. This puts a
+   single booking control within thumb reach instead.
+
+   It sits under the consent banner (z-index 80) so that the banner is answered
+   first, and the footer gains matching bottom padding so the bar never permanently
+   covers the end of the page.
+   ========================================================= */
+.booking-bar { display: none; }
+
+@media (max-width: 920px) {
+  .booking-bar {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 70;
+    justify-content: center;
+    padding: 0.7rem var(--gutter);
+    padding-bottom: calc(0.7rem + env(safe-area-inset-bottom, 0px));
+    background: rgba(247, 241, 227, 0.92);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line);
+  }
+
+  .booking-bar__action {
+    width: 100%;
+    max-width: 26rem;
+    justify-content: center;
+  }
+
+  /* Room for the bar, in the footer so the teal runs underneath it. */
+  .footer {
+    padding-bottom: calc(clamp(3rem, 2rem + 4vw, 4.5rem) + 5rem);
+  }
+}
