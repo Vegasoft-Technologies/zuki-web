@@ -1,0 +1,7 @@
+# The recovered production copy is a record of what the live server serves, not project
+# source. Without this it is counted in the language statistics and the repository reads
+# as a static HTML project.
+reference/**  linguist-vendored
+docs/**       linguist-documentation
+*.png         binary
+*.jpg         binary
