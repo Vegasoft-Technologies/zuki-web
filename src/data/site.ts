@@ -12,6 +12,7 @@ export const site = {
     country: "United Kingdom",
   },
   telephone: "+441392666999",
+  telephoneDisplay: "+44 1392 666999",
   geo: {
     latitude: 50.7259,
     longitude: -3.5318,
