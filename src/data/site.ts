@@ -10,6 +10,8 @@ export const site = {
     locality: "Exeter",
     postcode: "EX4 3SB",
     country: "United Kingdom",
+    /** ISO 3166-1 alpha-2, which is what schema.org expects. */
+    countryCode: "GB",
   },
   telephone: "+441392666999",
   telephoneDisplay: "+44 1392 666999",
