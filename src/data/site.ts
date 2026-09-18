@@ -18,7 +18,7 @@ export const site = {
     longitude: -3.5318,
   },
   social: {
-    instagram: "",
+    instagram: "https://www.instagram.com/zukiscaffetteria/",
     facebook: "",
     tripadvisor: "",
   },
