@@ -67,3 +67,9 @@ is served locally. That 404 is the only console error the reference copy produce
 The script is preserved in `reference/` because that directory must stay byte-exact. It
 must not be carried into the migrated application: it is a third-party script that runs
 before any consent is given.
+
+It also carries a token that changes on every request, so a freshly downloaded
+`index.html` never hashes the same as the stored copy. Comparing the two with that one
+line excluded gives an identical hash, which confirms the recovered copy is faithful to
+the hand-written source. `styles.css` and `script.js` hash identically without any
+exclusion.
