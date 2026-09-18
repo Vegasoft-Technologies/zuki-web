@@ -20,10 +20,11 @@ export const site = {
   social: {
     instagram: "https://www.instagram.com/zukiscaffetteria/",
     facebook: "",
-    tripadvisor: "",
+    tripadvisor:
+      "https://www.tripadvisor.co.uk/Restaurant_Review-g186254-d15840655-Reviews-Zukis_Caffetteria-Exeter_Devon_England.html",
   },
   ordering: {
-    deliveroo: "",
-    justEat: "",
+    deliveroo: "https://deliveroo.co.uk/menu/exeter/exeter-city-centre/zukis-caffetteria",
+    justEat: "https://www.just-eat.co.uk/restaurants-zukis-caffetteria-exeter/menu",
   },
 } as const;
