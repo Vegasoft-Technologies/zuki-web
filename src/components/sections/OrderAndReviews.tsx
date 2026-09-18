@@ -1,4 +1,5 @@
 import Eyebrow from "@/components/ui/Eyebrow";
+import Reveal from "@/components/ui/Reveal";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { site } from "@/data/site";
 
@@ -29,7 +30,7 @@ const links = [
 export default function OrderAndReviews() {
   return (
     <section className="order" id="order">
-      <div className="order__inner reveal">
+      <Reveal className="order__inner">
         <Eyebrow className="eyebrow--center">{"Can't make it in?"}</Eyebrow>
         <SectionTitle className="section-title--center">
           Snap a photo, grab a bite, tell the world.
@@ -57,7 +58,7 @@ export default function OrderAndReviews() {
             </a>
           ))}
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }

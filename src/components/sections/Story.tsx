@@ -1,4 +1,5 @@
 import Eyebrow from "@/components/ui/Eyebrow";
+import Reveal from "@/components/ui/Reveal";
 import SectionTitle from "@/components/ui/SectionTitle";
 
 const features = [
@@ -23,7 +24,7 @@ export default function Story() {
   return (
     <section className="story" id="story">
       <div className="story__grid">
-        <div className="story__text reveal">
+        <Reveal className="story__text">
           <Eyebrow>The place</Eyebrow>
           <SectionTitle>Tucked just off Queen Street, since 2017.</SectionTitle>
           <p>
@@ -39,9 +40,9 @@ export default function Story() {
           <a className="link-arrow" href="#gallery">
             Take a look inside →
           </a>
-        </div>
+        </Reveal>
 
-        <ul className="story__features reveal">
+        <Reveal as="ul" className="story__features">
           {features.map((feature) => (
             <li key={feature.title}>
               <span className="feature__mark" aria-hidden="true">
@@ -51,7 +52,7 @@ export default function Story() {
               <p>{feature.body}</p>
             </li>
           ))}
-        </ul>
+        </Reveal>
       </div>
     </section>
   );

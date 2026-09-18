@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Eyebrow from "@/components/ui/Eyebrow";
+import Reveal from "@/components/ui/Reveal";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { gallery } from "@/data/gallery";
 import { site } from "@/data/site";
@@ -7,27 +8,28 @@ import { site } from "@/data/site";
 export default function Gallery() {
   return (
     <section className="gallery" id="gallery">
-      <div className="gallery__head reveal">
+      <Reveal className="gallery__head">
         <Eyebrow className="eyebrow--center">A look around</Eyebrow>
         <SectionTitle className="section-title--center">
           From our table to yours
         </SectionTitle>
-      </div>
+      </Reveal>
 
       <div className="gallery__grid">
         {gallery.map((image) => (
-          <figure
+          <Reveal
+            as="figure"
             key={image.caption}
             className={
               image.variant
-                ? `gallery__item gallery__item--${image.variant} reveal`
-                : "gallery__item reveal"
+                ? `gallery__item gallery__item--${image.variant}`
+                : "gallery__item"
             }
             data-caption={image.caption}
           >
             <Image src={image.src} alt={image.alt} loading="lazy" />
             <figcaption>{image.caption}</figcaption>
-          </figure>
+          </Reveal>
         ))}
       </div>
 
