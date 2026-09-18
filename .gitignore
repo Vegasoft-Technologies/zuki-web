@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+dist/
+.env*
+!.env.example
+.DS_Store
+*.log
+
+# Local tooling configuration — never commit
+CLAUDE.md
+.claude/
+.cursor/
+.aider*
+.playwright-mcp/
