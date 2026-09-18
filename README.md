@@ -34,15 +34,28 @@ The development server runs at <http://localhost:3000>.
 
 ## Commands
 
-| Command                | Purpose                                                                     |
-| ---------------------- | --------------------------------------------------------------------------- |
-| `npm run dev`          | Start the development server.                                               |
-| `npm run build`        | Produce a production build.                                                 |
-| `npm run start`        | Serve a production build.                                                   |
-| `npm run lint`         | Run ESLint.                                                                 |
-| `npm run format`       | Format the project with Prettier.                                           |
-| `npm run format:check` | Check formatting without writing changes.                                   |
-| `npx tsc --noEmit`     | Type-check. Run `npm run build` first, so that generated route types exist. |
+| Command                | Purpose                                   |
+| ---------------------- | ----------------------------------------- |
+| `npm run dev`          | Start the development server.             |
+| `npm run build`        | Produce a production build.               |
+| `npm run start`        | Serve a production build.                 |
+| `npm run lint`         | Run ESLint.                               |
+| `npm run format`       | Format the project with Prettier.         |
+| `npm run format:check` | Check formatting without writing changes. |
+| `npx tsc --noEmit`     | Type-check. See the order below.          |
+
+## Verification
+
+Run these three in this order before requesting a review:
+
+```bash
+npm run lint
+npm run build
+npx tsc --noEmit
+```
+
+The order matters. `npx tsc --noEmit` needs the route types that `npm run build`
+generates, so on a clean checkout it fails if it is run first.
 
 ## Performance budget
 
