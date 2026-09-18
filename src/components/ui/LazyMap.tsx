@@ -52,7 +52,7 @@ export default function LazyMap() {
       {loaded ? (
         <iframe
           src={site.maps.embed}
-          title="Map to Zuki's Caffetteria, 3B Queen Street, Exeter"
+          title={`Map to ${site.name}, ${site.address.street}, ${site.address.locality}`}
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
         />
