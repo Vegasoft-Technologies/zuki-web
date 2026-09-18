@@ -6,6 +6,16 @@ const nextConfig: NextConfig = {
   // local-only and are not part of this repository, so it must not write to them.
   agentRules: false,
 
+  // The recovered stylesheet is kept exactly as the production server serves it, where
+  // it sits at the site root and so resolves url("images/...") against /images. The
+  // bundler instead reads that as a module specifier, so it is pointed at the real file
+  // here rather than by editing the stylesheet.
+  turbopack: {
+    resolveAlias: {
+      "images/vine.svg": "./public/images/vine.svg",
+    },
+  },
+
   // Image optimisation stays off for now so that image handling does not block the
   // migration. Components still use next/image, so intrinsic width and height are
   // always emitted and no layout shift is introduced.

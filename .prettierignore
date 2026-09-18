@@ -2,6 +2,10 @@
 # It is moved, never reformatted.
 reference/
 
+# The application stylesheet is that same recovered file, moved into place. Reformatting
+# it would silently rewrite the one artefact the migration is measured against.
+src/app/globals.css
+
 # Generated or vendored
 .next/
 out/
