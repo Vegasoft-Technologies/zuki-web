@@ -2,7 +2,7 @@ import Eyebrow from "@/components/ui/Eyebrow";
 import SectionTitle from "@/components/ui/SectionTitle";
 import LazyMap from "@/components/ui/LazyMap";
 import { site } from "@/data/site";
-import { formatRange, openingHours } from "@/data/openingHours";
+import OpeningHoursTable from "@/components/ui/OpeningHoursTable";
 
 export default function Visit() {
   return (
@@ -50,16 +50,7 @@ export default function Visit() {
 
           <div className="visit__block">
             <h3>Opening hours</h3>
-            <table className="hours" id="hours">
-              <tbody>
-                {openingHours.map((day) => (
-                  <tr key={day.label} data-day={day.day}>
-                    <th>{day.label}</th>
-                    <td>{formatRange(day)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <OpeningHoursTable />
           </div>
         </div>
 
