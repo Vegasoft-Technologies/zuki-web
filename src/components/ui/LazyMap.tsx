@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { site } from "@/data/site";
+import { getConsent, getServerConsent, subscribe } from "@/lib/consent";
 
 /**
  * The map is a third-party embed from Google, so nothing is requested from it until
@@ -9,7 +10,12 @@ import { site } from "@/data/site";
  * hides that placeholder once the map has loaded.
  */
 export default function LazyMap() {
-  const [loaded, setLoaded] = useState(false);
+  const [asked, setAsked] = useState(false);
+  const consent = useSyncExternalStore(subscribe, getConsent, getServerConsent);
+
+  // Either the visitor pressed the button, or they have already accepted everything.
+  // On the server `consent` is "unknown", so nothing loads during the server render.
+  const loaded = asked || consent === "all";
 
   return (
     <div
@@ -29,7 +35,7 @@ export default function LazyMap() {
           className="btn btn--small btn--gold"
           id="mapLoadBtn"
           type="button"
-          onClick={() => setLoaded(true)}
+          onClick={() => setAsked(true)}
         >
           Show map
         </button>
