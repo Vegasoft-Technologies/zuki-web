@@ -2,6 +2,7 @@ import Eyebrow from "@/components/ui/Eyebrow";
 import Reveal from "@/components/ui/Reveal";
 import SectionTitle from "@/components/ui/SectionTitle";
 import MenuPanel from "@/components/sections/MenuPanel";
+import MenuTabs from "@/components/sections/MenuTabs";
 import { menu, menuAllergyNote } from "@/data/menu";
 
 export default function MenuSection() {
@@ -19,23 +20,12 @@ export default function MenuSection() {
         </p>
       </Reveal>
 
-      <div className="menu__tabs" role="tablist" aria-label="Menu sections">
-        {menu.map((category, index) => (
-          <button
-            key={category.id}
-            className={index === 0 ? "menu__tab is-active" : "menu__tab"}
-            role="tab"
-            aria-selected={index === 0}
-            data-tab={category.id}
-          >
-            {category.label}
-          </button>
+      <MenuTabs
+        categories={menu.map(({ id, label }) => ({ id, label }))}
+        panels={menu.map((category) => (
+          <MenuPanel key={category.id} category={category} />
         ))}
-      </div>
-
-      {menu.map((category, index) => (
-        <MenuPanel key={category.id} category={category} isActive={index === 0} />
-      ))}
+      />
 
       <p className="menu__allergy">{menuAllergyNote}</p>
     </section>
