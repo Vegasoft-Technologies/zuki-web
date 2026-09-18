@@ -1,6 +1,7 @@
 import Image from "next/image";
 import logo from "../../../public/images/logo.png";
 import vegasoftLogo from "../../../public/images/vegasoft-logo.png";
+import CurrentYear from "@/components/ui/CurrentYear";
 import { site } from "@/data/site";
 
 export default function SiteFooter() {
@@ -26,7 +27,8 @@ export default function SiteFooter() {
           <a href="/privacy">Privacy & cookies</a>
         </nav>
         <p className="footer__copy">
-          © <span id="year"></span> {"Zuki's Caffetteria. Made with espresso & çay."}
+          © <CurrentYear />
+          {" Zuki's Caffetteria. Made with espresso & çay."}
         </p>
       </div>
 
