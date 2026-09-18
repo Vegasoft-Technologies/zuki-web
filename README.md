@@ -57,6 +57,17 @@ npx tsc --noEmit
 The order matters. `npx tsc --noEmit` needs the route types that `npm run build`
 generates, so on a clean checkout it fails if it is run first.
 
+## Documentation
+
+| Document                                                           | What it covers                                                              |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md)                               | Branches, commits, and how a change reaches `main`                          |
+| [`docs/engineering-guidelines.md`](docs/engineering-guidelines.md) | How the code is shaped, and why                                             |
+| [`docs/architecture.md`](docs/architecture.md)                     | The folder tree, how a request renders, which components run in the browser |
+| [`docs/content-guide.md`](docs/content-guide.md)                   | Editing the menu, hours and gallery without being a developer               |
+| [`docs/baseline.md`](docs/baseline.md)                             | Measurements, with the date each was taken                                  |
+| [`docs/decisions/`](docs/decisions/)                               | Why the significant choices were made                                       |
+
 ## Performance budget
 
 The figures the migrated site must not regress against are recorded in
