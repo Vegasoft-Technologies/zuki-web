@@ -1,0 +1,42 @@
+name: Bug report
+description: Something on the site behaves incorrectly.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happens
+    attributes:
+      label: What happens
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the site at 375px
+        2. Tap the menu button
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: width
+    attributes:
+      label: Screen width
+      description: The width you saw it at, in CSS pixels.
+      placeholder: "375"
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: Safari 18 on iPhone 14
+    validations:
+      required: true
+  - type: textarea
+    id: console
+    attributes:
+      label: Console output
+      description: Any errors or warnings in the browser console.
+      render: text
