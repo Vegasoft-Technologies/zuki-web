@@ -8,11 +8,11 @@ requirements, not observations: the migrated site must not regress against them.
 
 Measured by the client before the migration began.
 
-| Metric          | Value   |
-| --------------- | ------- |
-| Download time   | 0.532 s |
-| Page load time  | 0.198 s |
-| HTTP requests   | 19      |
+| Metric         | Value   |
+| -------------- | ------- |
+| Download time  | 0.532 s |
+| Page load time | 0.198 s |
+| HTTP requests  | 19      |
 
 ## 2026-09-18 — Recovery of the production source
 
@@ -20,13 +20,13 @@ The production files were downloaded into `reference/`, which is a byte-exact co
 what the live server serves. It is the source of truth for appearance and is never
 edited.
 
-| File           | Size       |
-| -------------- | ---------- |
-| `index.html`   | 54,758 B   |
-| `styles.css`   | 27,880 B   |
-| `script.js`    | 6,917 B    |
-| `privacy.html` | 6,964 B    |
-| `images/`      | 26 files   |
+| File           | Size        |
+| -------------- | ----------- |
+| `index.html`   | 54,758 B    |
+| `styles.css`   | 27,880 B    |
+| `script.js`    | 6,917 B     |
+| `privacy.html` | 6,964 B     |
+| `images/`      | 26 files    |
 | `reference/`   | 11 MB total |
 
 Every local asset referenced by `index.html` and `styles.css` resolves. No file
