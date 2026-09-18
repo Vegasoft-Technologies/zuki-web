@@ -24,3 +24,15 @@ export const openingHours: DayHours[] = [
 ];
 
 export const TIMEZONE = "Europe/London";
+
+/** "08:00", from minutes past midnight. */
+export function formatTime(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+/** "08:00 \u2013 17:00", exactly as the hours table prints it. */
+export function formatRange(day: DayHours): string {
+  return `${formatTime(day.opens)} \u2013 ${formatTime(day.closes)}`;
+}
