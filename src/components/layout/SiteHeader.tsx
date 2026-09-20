@@ -44,6 +44,24 @@ export default function SiteHeader() {
           </span>
         </a>
 
+        <a
+          className="nav__social"
+          href={site.social.instagram}
+          target="_blank"
+          rel="noopener"
+          aria-label="Zuki's Caffetteria on Instagram"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="nav__social-icon">
+            <path
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              d="M7.5 3h9A4.5 4.5 0 0 1 21 7.5v9a4.5 4.5 0 0 1-4.5 4.5h-9A4.5 4.5 0 0 1 3 16.5v-9A4.5 4.5 0 0 1 7.5 3Zm4.5 5.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z"
+            />
+            <circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" />
+          </svg>
+        </a>
+
         <nav className="nav__links" aria-label="Primary">
           <a href="#story">Story</a>
           <a href="#menu">Menu</a>
