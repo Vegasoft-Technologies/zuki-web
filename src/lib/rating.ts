@@ -1,10 +1,10 @@
 /**
- * The live rating shown in the header.
+ * The live rating shown in the header, from the Places API (New).
  *
  * Read on the server only. The key never reaches the browser, and the provider is never
  * called from it, which is what keeps the visitor's address away from a third party
  * before they have consented to anything. The result is cached and revalidated at most
- * once a day.
+ * once a day, so the provider is called once per build or revalidation, not per visitor.
  *
  * If the key or the place identifier is absent, or the request fails, the answer is
  * `null` and the badge renders nothing. A stale or invented figure is never shown.
@@ -23,28 +23,32 @@ export interface Rating {
 
 const REVALIDATE_SECONDS = 60 * 60 * 24;
 
-/** Pure. Turns a Place Details response into a rating, or null if it has none. */
+/**
+ * Pure. Turns a Places API (New) place resource into a rating, or null if it has none.
+ * The resource carries `rating`, `userRatingCount` and `googleMapsUri`.
+ */
 export function parseRating(
   body: unknown,
   placeId: string,
   fetchedAt: Date,
 ): Rating | null {
   if (typeof body !== "object" || body === null) return null;
-  const result = (body as { result?: unknown }).result;
-  if (typeof result !== "object" || result === null) return null;
-  const { rating, user_ratings_total: count } = result as {
+  const {
+    rating,
+    userRatingCount: count,
+    googleMapsUri,
+  } = body as {
     rating?: unknown;
-    user_ratings_total?: unknown;
+    userRatingCount?: unknown;
+    googleMapsUri?: unknown;
   };
   if (typeof rating !== "number" || typeof count !== "number") return null;
   if (!(rating >= 0 && rating <= 5) || !Number.isInteger(count) || count < 0) return null;
-  return {
-    value: rating,
-    count,
-    source: "Google",
-    url: `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(placeId)}`,
-    fetchedAt,
-  };
+  const url =
+    typeof googleMapsUri === "string" && googleMapsUri.startsWith("https://")
+      ? googleMapsUri
+      : `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(placeId)}`;
+  return { value: rating, count, source: "Google", url, fetchedAt };
 }
 
 export async function fetchRating(): Promise<Rating | null> {
@@ -54,14 +58,18 @@ export async function fetchRating(): Promise<Rating | null> {
 
   // Overridable so the badge can be exercised against a local stand-in in development
   // and tests. Production leaves it unset and talks to Google.
-  const base = process.env.GOOGLE_PLACES_API_URL ?? "https://maps.googleapis.com";
-  const url = new URL("/maps/api/place/details/json", base);
-  url.searchParams.set("place_id", placeId);
-  url.searchParams.set("fields", "rating,user_ratings_total");
-  url.searchParams.set("key", key);
+  const base = process.env.GOOGLE_PLACES_API_URL ?? "https://places.googleapis.com";
+  const url = new URL(`/v1/places/${encodeURIComponent(placeId)}`, base);
 
   try {
-    const response = await fetch(url, { next: { revalidate: REVALIDATE_SECONDS } });
+    const response = await fetch(url, {
+      headers: {
+        "X-Goog-Api-Key": key,
+        // Only the three fields the badge needs; the field mask also keeps the call cheap.
+        "X-Goog-FieldMask": "rating,userRatingCount,googleMapsUri",
+      },
+      next: { revalidate: REVALIDATE_SECONDS },
+    });
     if (!response.ok) return null;
     return parseRating(await response.json(), placeId, new Date());
   } catch {
