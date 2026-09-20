@@ -37,11 +37,13 @@ because its audience is in Exeter, United Kingdom.
 ## The reference directory
 
 `reference/` holds a byte-exact copy of the website as it was downloaded from production,
-together with screenshots at three widths. It is the source of truth for appearance and
-is never edited.
+together with screenshots at three widths. It is never edited.
 
-Until the migration is complete, the rendered site must be visually identical to
-`reference/screenshots/`. Changes to appearance or content are separate, later tasks.
+It is the record of what was inherited, and the baseline for anything that has not been
+deliberately changed. During the migration the rendered site had to match it exactly;
+that phase is complete. Now a pull request that changes what a visitor sees states what
+changed and why, and everything it does not mention is still expected to match
+`reference/`.
 
 ## Styling
 
