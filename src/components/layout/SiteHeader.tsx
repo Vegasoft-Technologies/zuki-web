@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import logo from "../../../public/images/logo.png";
@@ -82,9 +83,9 @@ export default function SiteHeader({ rating }: SiteHeaderProps) {
           <a href="#visit">Visit</a>
         </nav>
 
-        <a className="btn btn--small" href={`tel:${site.telephone}`}>
+        <Link className="btn btn--small" href="/#book">
           <span className="btn__dot" aria-hidden="true"></span> Book a table
-        </a>
+        </Link>
 
         <button
           className="nav__toggle"
