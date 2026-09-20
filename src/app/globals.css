@@ -1083,3 +1083,33 @@ a:focus-visible, button:focus-visible, .menu__tab:focus-visible {
 @media (min-width: 681px) {
   .booking__row { grid-template-columns: 1fr 1fr; }
 }
+
+/* =========================================================
+   HEADER IDENTITY: INSTAGRAM HANDLE AND RATING STARS
+   Added after the migration; not part of the recovered stylesheet.
+
+   The Instagram link is coloured with the site's own gold; currentColor in the glyph
+   means the one declaration drives glyph and handle together. Below 681px the header
+   also holds the rating badge and the burger, and the handle does not fit beside them,
+   so the glyph stands alone there and the accessible name carries the account.
+   ========================================================= */
+.nav__social {
+  width: auto;
+  min-width: 44px;
+  padding: 0 0.55rem;
+  gap: 0.4rem;
+  color: var(--gold-deep);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav__social:hover { color: var(--gold); }
+.nav__social-handle { display: none; }
+@media (min-width: 681px) {
+  .nav__social-handle { display: inline; }
+}
+
+.rating-badge__stars { display: inline-flex; gap: 0.05em; margin-right: 0.35em; font-size: 0.85em; line-height: 1; }
+.rating-badge__star { color: var(--line); }
+.rating-badge__star.is-filled { color: var(--gold); }

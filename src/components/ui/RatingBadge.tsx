@@ -25,8 +25,21 @@ export default async function RatingBadge() {
       aria-label={`Rated ${value} out of 5 from ${rating.count} reviews on ${rating.source}, updated ${updated}. Read the reviews.`}
     >
       <span className="rating-badge__value" aria-hidden="true">
+        <span className="rating-badge__stars">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <span
+              key={n}
+              className={
+                n <= Math.round(rating.value)
+                  ? "rating-badge__star is-filled"
+                  : "rating-badge__star"
+              }
+            >
+              ★
+            </span>
+          ))}
+        </span>
         {value}
-        <span className="rating-badge__star">★</span>
       </span>
       <span className="rating-badge__meta" aria-hidden="true">
         {`${rating.count} reviews · ${rating.source}, ${updated}`}
