@@ -57,6 +57,49 @@ Notes on how these were captured, so that later comparisons are made the same wa
   page. Its own behaviour is verified separately.
 - No horizontal overflow at the mobile width.
 
+## 2026-09-20 — Image formats and layout shift
+
+Cumulative Layout Shift on the home page, production build, measured with a
+`PerformanceObserver` for `layout-shift` installed before the page rendered, then scrolled
+end to end so every lazily loaded image arrived. Shifts caused by input are excluded.
+
+| Width   | Before | After |
+| ------- | ------ | ----- |
+| 375 px  | 0      | 0     |
+| 768 px  | 0      | 0     |
+| 1280 px | 0      | 0     |
+
+Zero shifts recorded in either state. All 26 images already emit intrinsic `width` and
+`height` through static imports, which is why there was nothing to fix.
+
+### Formats generated
+
+`npm run images:formats` writes an AVIF and a WebP beside every JPEG and PNG in
+`public/images/`. The originals are unchanged; a spot check of the served JPEG against
+`reference/images/` is byte-identical.
+
+|                             | Total          |
+| --------------------------- | -------------- |
+| 24 originals (JPEG and PNG) | 11,057 KB      |
+| 24 WebP                     | 5,154 KB (47%) |
+| 24 AVIF                     | 3,538 KB (32%) |
+
+### What is not yet in effect, and why
+
+`sizes` attributes were added to all five `next/image` call sites, measured against the
+rendered widths: gallery tiles are `44vw` at two columns, `29vw` at three, and
+`min(21vw, 251px)` at four, capped by the 1180 px container; the logos are fixed widths.
+
+**None of this reaches the browser yet.** With `images.unoptimized` set, Next.js emits no
+`srcset` and therefore omits `sizes` as well, and it serves the original JPEG regardless of
+the AVIF and WebP beside it. The rendered `<img>` tags carry `width`, `height` and `src`
+only. Today's download sizes are therefore unchanged from before this work.
+
+The loader setting is deliberately left alone. It is settled with the hosting decision
+(`docs/decisions/0005-hosting.md`), because which loader is right depends on where the site
+runs. Once it is switched on, the `sizes` values and the generated formats take effect
+without further change to the components.
+
 ## 2026-09-18 — Mobile experience audit
 
 Every interactive element measured at 375 px, in a production build. "Hit area" is the

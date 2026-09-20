@@ -27,7 +27,12 @@ export default function Gallery() {
             }
             data-caption={image.caption}
           >
-            <Image src={image.src} alt={image.alt} loading="lazy" />
+            <Image
+              src={image.src}
+              alt={image.alt}
+              loading="lazy"
+              sizes="(min-width: 921px) min(21vw, 251px), (min-width: 681px) 29vw, 44vw"
+            />
             <figcaption>{image.caption}</figcaption>
           </Reveal>
         ))}

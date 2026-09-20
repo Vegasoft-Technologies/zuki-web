@@ -11,7 +11,13 @@ export default function Hero() {
       <div className="hero__canopy" aria-hidden="true"></div>
 
       <Reveal className="hero__inner">
-        <Image src={logo} alt="Zuki's Caffetteria" className="hero__logo" priority />
+        <Image
+          src={logo}
+          alt="Zuki's Caffetteria"
+          className="hero__logo"
+          priority
+          sizes="(min-width: 921px) 222px, 164px"
+        />
         <Eyebrow className="eyebrow--center">
           {"Est. 2017  ·  Queen Street, Exeter"}
         </Eyebrow>

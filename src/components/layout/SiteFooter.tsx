@@ -13,6 +13,7 @@ export default function SiteFooter() {
           alt="Zuki's Caffetteria"
           className="footer__logo"
           loading="lazy"
+          sizes="116px"
         />
         <p className="footer__tag">Italian & Turkish Caffetteria · Est. 2017 · Exeter</p>
         <nav className="footer__links" aria-label="Footer">
@@ -45,6 +46,7 @@ export default function SiteFooter() {
           className="vegasoft__logo"
           aria-hidden="true"
           loading="lazy"
+          sizes="36px"
         />
         <span className="vegasoft__text">
           <span className="vegasoft__line">
