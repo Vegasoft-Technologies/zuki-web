@@ -201,3 +201,42 @@ It also carries a token that changes on every request, so a freshly downloaded
 line excluded gives an identical hash, which confirms the recovered copy is faithful to
 the hand-written source. `styles.css` and `script.js` hash identically without any
 exclusion.
+
+## 2026-09-20 — Live rating, first observation
+
+The header badge reads from the Places API (New) using the café's Place ID
+`ChIJRxz9-QClbUgRigJpc1wN0pc`, which resolves to "Zukis Caffetteria, 3B Queen St,
+Exeter EX4 3SB". The figure is fetched on the server once per build or daily
+revalidation, never per visitor and never from the browser.
+
+| Date       | Source                     | Rating | Reviews | Note                                |
+| ---------- | -------------------------- | ------ | ------- | ----------------------------------- |
+| 2026-09-18 | client's analysis document | 4.6    | 281     | reported, not measured here         |
+| 2026-09-20 | Places API (New), observed | 4.6    | 281     | first measurement from this project |
+
+The two agree today. They will drift; this table is where later observations go, so a
+later figure is compared with a dated one rather than with memory.
+
+### How the figure was verified
+
+- Key present: the badge renders "4.6 · 281 reviews · Google, 20 Sept 2026"; the key
+  value appears 0 times in the prerendered HTML, in `.next/static`, in `.next/server`
+  and in the served pages; 0 client chunks name the provider host; the browser makes 0
+  requests to the provider at 375, 768 and 1280 pixels.
+- Once per build: with a stand-in provider and a clean `.next`, 20 page requests produced
+  1 provider request, with the key sent as a header and never in the URL.
+- Key withheld: 0 badge markup, the page still answers 200, the header lays out with the
+  Instagram link 24px after the logo at all three widths, height 69.4px, no horizontal
+  scroll. Screenshots: `docs/screenshots/rating-live-*.png` and `rating-absent-*.png`.
+
+### Two cautions for anyone re-measuring
+
+- **Start from a clean `.next`.** The persistent build cache will replay an earlier
+  prerender of the home page without running the fetch again, so a build after changing
+  the key or the fetcher can "succeed" in a fraction of a second and show a stale result.
+  Remove `.next` first.
+- **Never publish or share `.next`.** Its `cache/fetch-cache` directory stores the
+  provider request and response. With the key sent as a header it does not contain the
+  key (checked: 0 occurrences after a clean build), but an earlier draft that put the key
+  in the query string did leave it there, because the cache is keyed on the URL. Keep the
+  key in a header and `.next` ignored, as both are now.
