@@ -1,6 +1,6 @@
 # 0007 — Booking architecture
 
-**Status:** proposed — awaiting approval before any implementation
+**Status:** accepted, 2026-09-20 (amended: instant confirmation is the requirement)
 
 ## Context
 
@@ -48,15 +48,30 @@ is added with hosting. Email rather than SMS to start: it costs nothing per mess
 carries the full booking, and the café already publishes an email address. SMS can be a
 second notifier later if the café wants it.
 
-### Confirmation: by a person, to begin with
+### Confirmation: instant is the requirement; manual is the interim setting
 
-A reservation is a **request** until the café confirms it. The form says so before the
-visitor commits, and the success message repeats it.
+The requirement is **instant confirmation**: the visitor picks a slot, submits, and
+leaves with a confirmed table. This comes from the client's analysis, which records that
+customers expect an instant digital booking option, that the business loses them to
+venues that offer one because the site lacks a real-time reservation infrastructure, and
+that the local and tourist audience wants to book a guaranteed table. An earlier draft
+of this record chose manual confirmation as the default; that was decided without
+consulting the analysis and is corrected here.
 
-Reason: every capacity rule is provisional. Confirming automatically on rules the café
-has not validated would overbook a small room on the first busy Saturday. A single
-configuration flag switches to automatic confirmation once the café has run with the
-rules for a few weeks and is happy with them.
+Manual confirmation stays in the code, with a different role: it is a **temporary
+setting** used only while the café's capacity rules are unknown. Confirming instantly
+against a covers-per-slot figure nobody has supplied would overbook a small room, so
+the system ships with manual confirmation on.
+
+One configuration value switches between the two. Flipping it is the last step of this
+work, done the day the café answers the six provisional questions. Both sets of interface
+text are written now so that the switch changes no code:
+
+- **manual:** before submitting, the visitor is told the café will confirm the booking
+  by their chosen contact method; after submitting, that the request has been received
+  and is not yet a confirmed table.
+- **instant:** before submitting, the visitor is told the table will be held on
+  submission; after submitting, that the table is held, with the slot repeated back.
 
 ### Personal data
 
@@ -99,9 +114,10 @@ by email to the café — and `/privacy` is updated in the same pull request as 
 - Going live needs three things that wait on `0005`: the Postgres adapter, the email
   notifier, and a production rate limiter. Each is a small file behind an interface that
   already exists.
-- The café has to answer the provisional questions before automatic confirmation is
-  switched on. Until then a person confirms every booking, which is more work for them
-  but cannot overbook the room.
+- The café has to answer the six provisional questions before the confirmation setting
+  is switched to instant. Until then a person confirms every booking, which is more work
+  for them but cannot overbook the room. Instant confirmation, not manual, is the state
+  the work is finished in.
 - The privacy page changes from "we collect nothing" to a real description of what is
   held and why, which is the correct state for a site that takes bookings.
 - The structured data's `acceptsReservations` becomes true in fact rather than only by
