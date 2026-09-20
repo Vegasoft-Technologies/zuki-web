@@ -15,7 +15,8 @@ export default function MenuSection() {
           Full menu served all day till 4pm. Add a Mimosa to your brunch for £5.95.
           <span className="menu__legend">
             <em className="mi__diet">V</em> vegetarian ·{" "}
-            <em className="mi__diet mi__diet--vg">Vg</em> vegan
+            <em className="mi__diet mi__diet--vg">Vg</em> vegan ·{" "}
+            <em className="mi__diet">GF</em> gluten free
           </span>
         </p>
       </Reveal>
