@@ -969,3 +969,22 @@ a:focus-visible, button:focus-visible, .menu__tab:focus-visible {
 }
 .nav__social:hover { color: var(--poppy); background: rgba(22, 48, 45, 0.06); }
 .nav__social-icon { width: 22px; height: 22px; }
+
+/* =========================================================
+   COPY ADDRESS
+   Added after the migration; not part of the recovered stylesheet.
+   The button reuses .btn--small, which already carries a 44px hit area.
+   ========================================================= */
+.copy-address {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 0.9rem;
+  margin: 0.4rem 0 0.9rem;
+}
+.copy-address__status {
+  font-size: 0.85rem;
+  color: var(--teal-700);
+  font-weight: 600;
+  min-height: 1.2em;
+}

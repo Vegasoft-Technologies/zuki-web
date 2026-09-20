@@ -2,6 +2,7 @@ import Eyebrow from "@/components/ui/Eyebrow";
 import Reveal from "@/components/ui/Reveal";
 import SectionTitle from "@/components/ui/SectionTitle";
 import LazyMap from "@/components/ui/LazyMap";
+import CopyAddress from "@/components/ui/CopyAddress";
 import { site } from "@/data/site";
 import OpeningHoursTable from "@/components/ui/OpeningHoursTable";
 
@@ -16,13 +17,7 @@ export default function Visit() {
 
           <div className="visit__block">
             <h3>Where</h3>
-            <p>
-              {site.address.street}
-              <br />
-              {`${site.address.locality} ${site.address.postcode}`}
-              <br />
-              {site.address.country}
-            </p>
+            <CopyAddress />
             <p className="visit__hint">
               Right next to Exeter Central Station — perfect for a coffee before your
               train.
