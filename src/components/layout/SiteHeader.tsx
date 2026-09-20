@@ -74,6 +74,9 @@ export default function SiteHeader({ rating }: SiteHeaderProps) {
             />
             <circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" />
           </svg>
+          <span className="nav__social-handle" aria-hidden="true">
+            @zukiscaffetteria
+          </span>
         </a>
 
         <nav className="nav__links" aria-label="Primary">
