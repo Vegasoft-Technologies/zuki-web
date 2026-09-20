@@ -1,4 +1,5 @@
 import MenuItemRow from "@/components/sections/MenuItemRow";
+import { byAscendingPrice } from "@/lib/menuOrder";
 import type { MenuCategory, MenuGroup } from "@/types/menu";
 
 interface MenuPanelProps {
@@ -22,7 +23,7 @@ function Group({ group, first }: { group: MenuGroup; first: boolean }) {
         ) : null}
       </h3>
       <ul className={group.compact ? "menu__list menu__list--compact" : "menu__list"}>
-        {group.items.map((item) => (
+        {byAscendingPrice(group.items).map((item) => (
           <MenuItemRow key={item.name} item={item} />
         ))}
       </ul>
