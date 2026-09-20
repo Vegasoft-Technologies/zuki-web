@@ -40,8 +40,22 @@ An item can also have:
 
 - **`description`** is the small grey text under the name. Leave the whole line out if
   there isn't one.
-- **`diet`** puts a small tag after the name. Write `["vegetarian"]` for **V** or
-  `["vegan"]` for **Vg**. Leave the whole line out if neither applies.
+- **`diet`** puts a small tag after the name. Write `["vegetarian"]` for **V**,
+  `["vegan"]` for **Vg**, or `["gluten-free"]` for **GF**. An item can carry more than
+  one: `["vegetarian", "gluten-free"]`. Leave the whole line out if none applies.
+
+### Gluten free — read before adding the first one
+
+The **GF** tag exists and works, but no item carries it yet, on purpose. A wrong
+gluten-free label can make someone with coeliac disease ill, and whether a dish is
+gluten free depends on how the kitchen prepares it and what else touches the same
+surfaces — not on the ingredient list alone.
+
+So the rule is: **the list of gluten-free items comes from the kitchen, in writing.** Do
+not add the tag to an item because it looks as though it should be gluten free, because
+a similar item elsewhere is, or because a customer said so. When the kitchen's written
+list arrives, add `"gluten-free"` to exactly the items on it and nothing else, and keep
+the list with the change so it is clear where the labels came from.
 
 ### To change a price
 
