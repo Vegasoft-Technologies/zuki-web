@@ -5,6 +5,9 @@ import LazyMap from "@/components/ui/LazyMap";
 import CopyAddress from "@/components/ui/CopyAddress";
 import { site } from "@/data/site";
 import OpeningHoursTable from "@/components/ui/OpeningHoursTable";
+import BookingForm from "@/components/sections/BookingForm";
+import { confirmationMode, provisionalRules } from "@/lib/booking/config";
+import { templateTimes } from "@/lib/booking/slots";
 
 export default function Visit() {
   return (
@@ -47,6 +50,16 @@ export default function Visit() {
           <div className="visit__block">
             <h3>Opening hours</h3>
             <OpeningHoursTable />
+          </div>
+
+          <div className="visit__block" id="book">
+            <h3>Book a table</h3>
+            <BookingForm
+              mode={confirmationMode()}
+              maxPartyOnline={provisionalRules.maxPartyOnline}
+              templateTimes={templateTimes(provisionalRules)}
+              windowDays={provisionalRules.bookingWindowDays}
+            />
           </div>
         </Reveal>
 
