@@ -37,7 +37,13 @@ export default function SiteHeader() {
     <>
       <header className="nav" id="top">
         <a className="nav__brand" href="#top" aria-label="Zuki's Caffetteria — home">
-          <Image src={logo} alt="Zuki's Caffetteria" className="nav__logo" priority />
+          <Image
+            src={logo}
+            alt="Zuki's Caffetteria"
+            className="nav__logo"
+            priority
+            sizes="64px"
+          />
           <span className="nav__brand-text" aria-hidden="true">
             <span className="nav__brand-name">{"Zuki's"}</span>
             <span className="nav__brand-sub">Italian & Turkish</span>
