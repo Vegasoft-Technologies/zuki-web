@@ -944,3 +944,28 @@ a:focus-visible, button:focus-visible, .menu__tab:focus-visible {
     padding-bottom: calc(clamp(3rem, 2rem + 4vw, 4.5rem) + 5rem);
   }
 }
+
+/* =========================================================
+   HEADER INSTAGRAM LINK
+   Added after the migration; not part of the recovered stylesheet.
+
+   Sits immediately to the right of the logo at every width. The brand link used
+   to carry the margin that pushes the navigation to the far side; that margin
+   moves to this link so the two stay together, and whatever is later placed
+   between them (the rating badge) joins the same left-hand cluster.
+   ========================================================= */
+.nav__brand { margin-right: 0; }
+
+.nav__social {
+  margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  color: var(--teal-700);
+  transition: color 0.2s var(--ease), background 0.2s var(--ease);
+}
+.nav__social:hover { color: var(--poppy); background: rgba(22, 48, 45, 0.06); }
+.nav__social-icon { width: 22px; height: 22px; }
