@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import logo from "../../../public/images/logo.png";
 import MobileMenu from "./MobileMenu";
@@ -10,7 +10,12 @@ import { site } from "@/data/site";
 // different places in the document — the button is the last child of the header, the
 // menu is the header's next sibling — so the smallest boundary that can hold the shared
 // open state is the header itself. Its own content is static.
-export default function SiteHeader() {
+interface SiteHeaderProps {
+  /** The rating badge, rendered on the server and slotted between the logo and the Instagram link. */
+  rating?: ReactNode;
+}
+
+export default function SiteHeader({ rating }: SiteHeaderProps) {
   const [open, setOpen] = useState(false);
 
   // Opening the menu inserts it above the content, and the browser shifts the scroll
@@ -49,6 +54,8 @@ export default function SiteHeader() {
             <span className="nav__brand-sub">Italian & Turkish</span>
           </span>
         </a>
+
+        {rating}
 
         <a
           className="nav__social"

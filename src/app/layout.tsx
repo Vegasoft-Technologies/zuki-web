@@ -6,6 +6,7 @@ import SiteHeader from "@/components/layout/SiteHeader";
 import SiteFooter from "@/components/layout/SiteFooter";
 import BookingBar from "@/components/layout/BookingBar";
 import CookieBanner from "@/components/ui/CookieBanner";
+import RatingBadge from "@/components/ui/RatingBadge";
 import { buildStructuredData } from "@/lib/structuredData";
 import { site } from "@/data/site";
 
@@ -82,7 +83,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(buildStructuredData()) }}
         />
-        <SiteHeader />
+        <SiteHeader rating={<RatingBadge />} />
         {children}
         <SiteFooter />
         <BookingBar />

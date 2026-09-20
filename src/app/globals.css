@@ -988,3 +988,42 @@ a:focus-visible, button:focus-visible, .menu__tab:focus-visible {
   font-weight: 600;
   min-height: 1.2em;
 }
+
+/* =========================================================
+   RATING BADGE
+   Added after the migration; not part of the recovered stylesheet.
+   Sits between the logo and the Instagram link. Compact by default; the meta line
+   appears from 681px, where the header has room for it.
+   ========================================================= */
+.rating-badge {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--ink);
+  text-decoration: none;
+  line-height: 1.15;
+  transition: border-color 0.2s var(--ease);
+}
+.rating-badge:hover { border-color: var(--gold); }
+.rating-badge__value {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--teal-900);
+  white-space: nowrap;
+}
+.rating-badge__star { color: var(--gold); margin-left: 0.2em; }
+.rating-badge__meta {
+  display: none;
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+@media (min-width: 681px) {
+  .rating-badge__meta { display: block; }
+}
