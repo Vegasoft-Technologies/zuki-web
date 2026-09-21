@@ -17,11 +17,12 @@
     "BOOKING_CONFIRMATION": "manual",
   },
   // The incremental cache: prerendered pages and their fetched data, so that the rating's
-  // daily revalidation actually revalidates instead of being fixed at build time.
-  "r2_buckets": [
+  // daily revalidation actually revalidates instead of being fixed at build time. Workers
+  // KV rather than R2: R2 needs a payment method on the account (docs/decisions/0005).
+  "kv_namespaces": [
     {
-      "binding": "NEXT_INC_CACHE_R2_BUCKET",
-      "bucket_name": "zuki-web-cache",
+      "binding": "NEXT_INC_CACHE_KV",
+      "id": "34e2564563f2499d9dfcbaddead210c2",
     },
   ],
   // Bookings. The database is created once in the account (docs/access.md); its identifier

@@ -1,6 +1,7 @@
 # 0005 — Hosting platform
 
 **Status:** accepted, 2026-09-21 — Cloudflare Workers, in a dedicated Cloudflare account
+(amended 2026-09-21: the incremental cache is Workers KV, not R2)
 
 The options below were written while the choice was open and are kept as the record of
 what was weighed. The decision and its consequences follow them.
@@ -123,8 +124,9 @@ this project maintains that a Node host would have provided.
   attributes and the generated formats reach the browser, and the download sizes recorded
   in `docs/baseline.md` finally change.
 - **The rating's daily revalidation actually revalidates.** The adapter's incremental
-  cache is configured on R2. Without it the figure would be fixed at build time, which
-  contradicts the requirement that it follow the review metrics.
+  cache is configured on Workers KV (see the amendment below; it was first planned on
+  R2). Without it the figure would be fixed at build time, which contradicts the
+  requirement that it follow the review metrics.
 - **The two external validators become runnable.** Schema.org and Google's Rich Results
   test need a public URL; their output goes in `docs/baseline.md`.
 
@@ -161,6 +163,36 @@ Two consequences follow, and both are deliberate:
   personal data, whereas moving while the database holds only test bookings costs
   nothing. Starting in the Vegasoft account avoids the problem. A later change of account
   must not be made casually, for exactly this reason.
+
+### Amendment, 2026-09-21: the incremental cache is Workers KV, not R2
+
+**What changed.** The adapter's incremental cache — the prerendered pages and the fetched
+rating, revalidated daily — is stored in a Workers KV namespace (`zuki-web-cache`, binding
+`NEXT_INC_CACHE_KV`) instead of an R2 bucket.
+
+**Why.** Enabling R2 on a Cloudflare account requires a payment method on file, even for
+the free tier. The Vegasoft account has none, and putting a personal card behind a
+client's infrastructure is not appropriate. Workers KV needs no payment method and is
+already within the deployment token's scope, so nothing about the account or the token
+changed.
+
+**Why it is fine for this workload.** The cache holds a handful of objects — two
+prerendered pages, the sitemap, the rating response — and is rewritten at most once a
+day. KV's eventual consistency (a write may take up to a minute to be seen everywhere)
+is irrelevant at that rate: the worst case is a visitor seeing the previous day's rating
+for a minute after revalidation, which the requirement tolerates. The free allowance
+(100,000 reads and 1,000 writes a day, 1 GB) is far above what this site does.
+
+**What KV gives up compared with R2.** Strong consistency; objects larger than 25 MB
+(nothing here is close); a per-write cost model that would matter for a site with
+thousands of pages revalidating often, which this is not; and the option to serve the
+cache to anything other than the Worker. None of those apply today.
+
+**When to revisit.** If Vegasoft puts a company payment method on the account, R2 becomes
+available and the switch back is one binding and one import (`r2IncrementalCache`), with
+no change to the application. Or if the cache outgrows KV's limits — more than roughly
+1,000 revalidations a day, or objects near 25 MB — which would mean the site had become
+something quite different from a café's home page.
 
 ## What is settled by this
 
