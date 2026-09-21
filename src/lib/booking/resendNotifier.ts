@@ -1,4 +1,4 @@
-import type { ConfirmationMode } from "./config.ts";
+import { areaCopy, type ConfirmationMode } from "./config.ts";
 import type { Notifier } from "./notifier.ts";
 import type { BookingRecord } from "./store.ts";
 
@@ -59,8 +59,9 @@ export function renderNotice(booking: BookingRecord, mode: ConfirmationMode): No
   const confirmed = mode === "instant" && booking.status === "confirmed";
   const when = `${longDate(booking.slot.date)}, ${booking.slot.time}`;
   const party = `party of ${booking.partySize}`;
+  const area = areaCopy[booking.area];
   const state = confirmed ? "CONFIRMED" : "AWAITING CONFIRMATION";
-  const subject = `${confirmed ? "Table booked" : "Table request"}: ${when}, ${party} — ${state.toLowerCase()}`;
+  const subject = `${confirmed ? "Table booked" : "Table request"}: ${when}, ${party}, ${area.label.toLowerCase()} — ${state.toLowerCase()}`;
   const contact = [
     booking.contact.phone ? `Telephone: ${booking.contact.phone}` : null,
     booking.contact.email ? `Email: ${booking.contact.email}` : null,
@@ -72,6 +73,7 @@ export function renderNotice(booking: BookingRecord, mode: ConfirmationMode): No
     "",
     `Name:        ${booking.name}`,
     `Party size:  ${booking.partySize}`,
+    `Area:        ${area.label}${area.note ? ` — ${area.note}` : ""}`,
     `Date:        ${longDate(booking.slot.date)}`,
     `Time:        ${booking.slot.time}`,
     ...contact.map((line) => `${line.split(":")[0]}:`.padEnd(13) + line.split(": ")[1]),

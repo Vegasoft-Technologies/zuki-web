@@ -57,9 +57,14 @@ const slotAt = (time: string, date = "2026-09-22") => {
   return check.slot;
 };
 
-const party = (size: number, time = "12:00"): ReserveRequest => ({
+const party = (
+  size: number,
+  time = "12:00",
+  area: "inside" | "outside" = "inside",
+): ReserveRequest => ({
   name: "Ada Lovelace",
   partySize: size,
+  area,
   slot: slotAt(time),
   contact: { phone: "+44 1392 000000" },
   status: "confirmed",
@@ -85,7 +90,7 @@ test("covers are counted only for sittings that overlap the window", async () =>
   await store.reserve(party(4, "12:00"), 12); // 12:00–12:45
   const at = (t: string) => {
     const s = slotAt(t);
-    return store.coversDuring("2026-09-22", s.startsAt, s.endsAt);
+    return store.coversDuring("2026-09-22", s.startsAt, s.endsAt, "inside");
   };
   assert.equal(await at("11:00"), 0); // ends before it starts
   assert.equal(await at("12:00"), 4); // overlaps
@@ -161,6 +166,7 @@ test("the handlers run unchanged against the D1 store", async () => {
   const good = {
     name: "Ada Lovelace",
     partySize: "6",
+    area: "inside",
     date: "2026-09-22",
     time: "12:00",
     phone: "+44 1392 000000",
@@ -168,16 +174,42 @@ test("the handlers run unchanged against the D1 store", async () => {
     note: "",
     website: "",
   };
-  assert.equal((await post(good)).status, 201);
-  assert.equal((await post(good)).status, 201);
+  for (let i = 0; i < 3; i++) assert.equal((await post(good)).status, 201); // 18 of 22 inside
   const full = await post(good);
   assert.equal(full.status, 409);
-  assert.match((await full.json()).errors.time, /filled up/);
-  assert.equal(notifier.received.length, 2);
+  assert.match((await full.json()).errors.time, /Only 4 seats are left inside/);
+  assert.equal((await post({ ...good, area: "outside" })).status, 201); // outside untouched
+  assert.equal(notifier.received.length, 4);
   const availability = await (
     await handlers.GET(new Request("http://localhost/api/bookings?date=2026-09-22"))
   ).json();
-  const times = availability.slots.map((s: { time: string }) => s.time);
-  assert.ok(!times.includes("12:00"));
-  assert.ok(times.includes("13:00"));
+  const at12 = availability.slots.find((s: { time: string }) => s.time === "12:00");
+  assert.deepEqual(at12.remaining, { inside: 4, outside: 9 });
+});
+
+test("twenty simultaneous requests for the last inside seat: one succeeds, 22 inside covers stored", async () => {
+  const store = new D1BookingStore(db);
+  for (let i = 0; i < 3; i++) await store.reserve(party(6, "13:00", "inside"), 22); // 18
+  await store.reserve(party(3, "13:00", "inside"), 22); // 21 of 22
+  await store.reserve(party(5, "13:00", "outside"), 15); // outside is separate
+  const results = await Promise.all(
+    Array.from({ length: 20 }, () => store.reserve(party(1, "13:00", "inside"), 22)),
+  );
+  assert.equal(results.filter((r) => r.ok).length, 1);
+  const s = slotAt("13:00");
+  assert.equal(
+    await store.coversDuring("2026-09-22", s.startsAt, s.endsAt, "inside"),
+    22,
+  );
+  assert.equal(
+    await store.coversDuring("2026-09-22", s.startsAt, s.endsAt, "outside"),
+    5,
+  );
+});
+
+test("an inside booking never consumes an outside seat, and the reverse", async () => {
+  const store = new D1BookingStore(db);
+  for (let i = 0; i < 3; i++) await store.reserve(party(5, "14:00", "outside"), 15); // outside full
+  assert.equal((await store.reserve(party(1, "14:00", "outside"), 15)).ok, false);
+  assert.equal((await store.reserve(party(6, "14:00", "inside"), 22)).ok, true);
 });

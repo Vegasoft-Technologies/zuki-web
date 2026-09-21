@@ -28,6 +28,7 @@ function setup(overrides: Partial<Parameters<typeof createBookingHandlers>[0]> =
 const good = {
   name: "Ada Lovelace",
   partySize: "2",
+  area: "inside",
   date: "2026-09-22",
   time: "12:00",
   phone: "+44 1392 000000",
@@ -66,6 +67,8 @@ for (const [field, patch, expectKey] of [
   ["missing name", { name: "" }, "name"],
   ["party too large", { partySize: "9" }, "partySize"],
   ["party of zero", { partySize: "0" }, "partySize"],
+  ["no area", { area: "" }, "area"],
+  ["unknown area", { area: "garden" }, "area"],
   ["no contact method", { phone: "", email: "" }, "contact"],
   ["bad email", { phone: "", email: "not-an-email" }, "email"],
   ["bad phone", { phone: "call me" }, "phone"],
@@ -113,27 +116,42 @@ test("the body size cap refuses an oversized request before parsing it", async (
   assert.equal(res.status, 413);
 });
 
-test("a full sitting answers 409 with the seats remaining", async () => {
+test("a full inside sitting answers 409 with the seats remaining, while outside still accepts", async () => {
   const { handlers } = setup();
-  for (let i = 0; i < 6; i++) assert.equal((await handlers.POST(post(good))).status, 201); // 12 covers
+  for (let i = 0; i < 11; i++)
+    assert.equal((await handlers.POST(post(good))).status, 201); // 22 inside
   const res = await handlers.POST(post(good));
   assert.equal(res.status, 409);
   const body = await res.json();
   assert.equal(body.remaining, 0);
-  assert.match(body.errors.time, /filled up/);
+  assert.match(body.errors.time, /filled up inside/);
+  assert.equal((await handlers.POST(post({ ...good, area: "outside" }))).status, 201);
 });
 
-test("two simultaneous bookings for the last table: one 201, one 409", async () => {
+test("a full outside sitting rejects the next outside guest while inside still accepts", async () => {
+  const { handlers } = setup();
+  const outside = { ...good, area: "outside", partySize: "5" };
+  for (let i = 0; i < 3; i++)
+    assert.equal((await handlers.POST(post(outside))).status, 201); // 15
+  const res = await handlers.POST(post({ ...outside, partySize: "1" }));
+  assert.equal(res.status, 409);
+  assert.match((await res.json()).errors.time, /outside/);
+  assert.equal((await handlers.POST(post(good))).status, 201);
+});
+
+test("twenty simultaneous requests for the last inside seat: exactly one 201, 22 inside covers", async () => {
   const { store, handlers } = setup();
-  for (let i = 0; i < 5; i++) await handlers.POST(post(good)); // 10 of 12
-  const [a, b] = await Promise.all([
-    handlers.POST(post(good)),
-    handlers.POST(post(good)),
-  ]);
-  assert.deepEqual([a.status, b.status].sort(), [201, 409]);
+  for (let i = 0; i < 7; i++) await handlers.POST(post({ ...good, partySize: "3" })); // 21 of 22
+  const results = await Promise.all(
+    Array.from({ length: 20 }, () => handlers.POST(post({ ...good, partySize: "1" }))),
+  );
+  const statuses = results.map((r) => r.status);
+  assert.equal(statuses.filter((s) => s === 201).length, 1);
+  assert.equal(statuses.filter((s) => s === 409).length, 19);
+  const inside = (await store.list(good.date)).filter((x) => x.area === "inside");
   assert.equal(
-    (await store.list(good.date)).reduce((s, x) => s + x.partySize, 0),
-    12,
+    inside.reduce((s, x) => s + x.partySize, 0),
+    22,
   );
 });
 
@@ -173,12 +191,16 @@ test("availability lists the slots with room and drops any sitting that would ov
   const url = "http://localhost/api/bookings?date=2026-09-22";
   const before = await (await handlers.GET(new Request(url))).json();
   assert.ok(before.slots.some((s: { time: string }) => s.time === "12:00"));
-  for (let i = 0; i < 6; i++) await handlers.POST(post(good)); // 12:00–12:45 now holds 12 covers
+  for (let i = 0; i < 11; i++) await handlers.POST(post(good)); // 12:00–12:45 holds 22 inside
   const after = await (await handlers.GET(new Request(url))).json();
-  const times = after.slots.map((s: { time: string }) => s.time);
-  assert.ok(!times.includes("12:00"));
-  assert.ok(times.includes("11:00")); // ends before the full sitting starts
-  assert.ok(times.includes("13:00")); // starts after it ends
+  const at12 = after.slots.find((s: { time: string }) => s.time === "12:00");
+  assert.deepEqual(at12.remaining, { inside: 0, outside: 15 }); // still listed: outside has room
+  const at11 = after.slots.find((s: { time: string }) => s.time === "11:00");
+  assert.deepEqual(at11.remaining, { inside: 22, outside: 15 }); // ends before the full sitting
+  for (let i = 0; i < 3; i++)
+    await handlers.POST(post({ ...good, area: "outside", partySize: "5" }));
+  const both = await (await handlers.GET(new Request(url))).json();
+  assert.ok(!both.slots.some((s: { time: string }) => s.time === "12:00")); // both areas full
 });
 
 test("availability without a date is a 400", async () => {

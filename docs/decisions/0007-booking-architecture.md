@@ -71,6 +71,26 @@ sitting finishes before the kitchen closes.** With a 45-minute sitting on hourly
 that is 15:00 Monday to Friday and 14:00 on Saturday and Sunday. It follows the kitchen
 time automatically if that ever changes.
 
+### Seating areas
+
+The café has two areas and wants guests to choose. Inside has 45 to 50 seats across 11
+tables; outside has 30. Guests arrive without booking, so the room must not be given away
+in advance: **half of each area is offered online** and the rest is kept for walk-ins.
+The configuration states the café's totals (inside 45, the lower figure; outside 30) and
+the share (0.5) by name, and derives the online covers from them — 22 inside, 15 outside —
+so that changing the policy is one edit and the reasoning stays visible.
+
+`area` is a required field on every booking, with no default. The capacity check keys on
+the slot and the area together: the guarded `INSERT` counts only bookings in the same
+area, so two guests taking the last inside seat at once still resolve to exactly one, and
+an inside booking never consumes an outside seat. Availability is reported per area, so
+the form can show that inside is full while outside is not.
+
+Outside seating carries a plain note, in the café's voice, that it depends on the
+weather: shown beside the choice before the guest commits, repeated in the confirmation,
+and repeated in the notice to the café. There is no weather logic and there will be none;
+the note is the whole of it.
+
 ### How the café is notified
 
 Through a `Notifier` interface with one operation: deliver a booking notice. Two

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { bookingCopy, confirmationMode } from "@/lib/booking/config";
+import { areaCopy, bookingCopy, confirmationMode, type Area } from "@/lib/booking/config";
 
 export const metadata: Metadata = {
   title: "Your booking — Zuki's Caffetteria",
@@ -25,8 +25,13 @@ export default async function BookingDonePage({ searchParams }: PageProps<"/book
     const date = one(params.date);
     const time = one(params.time);
     const party = one(params.party);
+    const area = one(params.area);
+    const areaText =
+      area === "inside" || area === "outside" ? areaCopy[area as Area] : null;
     body = copy.successBody;
-    if (date && time) body += ` ${date} at ${time}${party ? `, party of ${party}` : ""}.`;
+    if (date && time)
+      body += ` ${date} at ${time}${party ? `, party of ${party}` : ""}${areaText ? `, ${areaText.label.toLowerCase()}` : ""}.`;
+    if (areaText?.note) body += ` ${areaText.note}`;
     if (status === "received" && mode === "instant") {
       body = bookingCopy.manual.successBody;
     }

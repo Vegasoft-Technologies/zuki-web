@@ -1,11 +1,12 @@
 import { site } from "../../data/site.ts";
-import type { BookingRules } from "./config.ts";
+import { AREAS, type Area, type BookingRules } from "./config.ts";
 import { checkSlot, describeProblem, type Slot } from "./slots.ts";
 import type { Contact } from "./store.ts";
 
 export interface RawInput {
   name: string;
   partySize: string;
+  area: string;
   date: string;
   time: string;
   phone: string;
@@ -18,6 +19,7 @@ export interface RawInput {
 export interface ValidBooking {
   name: string;
   partySize: number;
+  area: Area;
   slot: Slot;
   contact: Contact;
   note?: string;
@@ -36,6 +38,7 @@ export function readInput(raw: Record<string, unknown>): RawInput {
   return {
     name: text(raw.name, 80),
     partySize: text(raw.partySize, 3),
+    area: text(raw.area, 10),
     date: text(raw.date, 10),
     time: text(raw.time, 5),
     phone: text(raw.phone, 20),
@@ -59,6 +62,11 @@ export function validate(input: RawInput, rules: BookingRules, now: Date): Valid
   } else if (party > rules.maxPartyOnline) {
     errors.partySize = `For parties larger than ${rules.maxPartyOnline}, please telephone us on ${site.telephoneDisplay}.`;
   }
+
+  const area = (AREAS as readonly string[]).includes(input.area)
+    ? (input.area as Area)
+    : null;
+  if (area === null) errors.area = "Please choose inside or outside.";
 
   const slot = checkSlot(input.date, input.time, rules, now);
   if (!slot.ok) {
@@ -88,13 +96,16 @@ export function validate(input: RawInput, rules: BookingRules, now: Date): Valid
       "Please give a telephone number or an email address so we can reach you.";
   }
 
-  if (Object.keys(errors).length > 0 || !slot.ok) return { ok: false, errors };
+  if (Object.keys(errors).length > 0 || !slot.ok || area === null) {
+    return { ok: false, errors };
+  }
 
   return {
     ok: true,
     value: {
       name: input.name,
       partySize: party,
+      area,
       slot: slot.slot,
       contact,
       note: input.note || undefined,

@@ -2,7 +2,13 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
 import { site } from "@/data/site";
-import { bookingCopy, type ConfirmationMode } from "@/lib/booking/config";
+import {
+  AREAS,
+  areaCopy,
+  bookingCopy,
+  type Area,
+  type ConfirmationMode,
+} from "@/lib/booking/config";
 
 interface BookingFormProps {
   mode: ConfirmationMode;
@@ -15,11 +21,15 @@ interface BookingFormProps {
 
 interface SlotOption {
   time: string;
-  remaining: number;
+  /** Seats still bookable online in each area. */
+  remaining: Record<Area, number>;
 }
 
 type Errors = Partial<
-  Record<"name" | "partySize" | "date" | "time" | "phone" | "email" | "contact", string>
+  Record<
+    "name" | "partySize" | "area" | "date" | "time" | "phone" | "email" | "contact",
+    string
+  >
 >;
 
 interface Done {
@@ -28,11 +38,14 @@ interface Done {
   date: string;
   time: string;
   partySize: number;
+  areaLabel: string;
+  areaNote: string | null;
 }
 
 const FIELDS = [
   "name",
   "partySize",
+  "area",
   "date",
   "time",
   "phone",
@@ -73,6 +86,7 @@ export default function BookingForm({
   const today = useSyncExternalStore(subscribe, getToday, getServerToday);
 
   const [date, setDate] = useState("");
+  const [area, setArea] = useState<Area | "">("");
   const [slots, setSlots] = useState<SlotOption[] | null>(null);
   const [slotsState, setSlotsState] = useState<"idle" | "loading" | "failed">("idle");
   const [errors, setErrors] = useState<Errors>({});
@@ -142,6 +156,8 @@ export default function BookingForm({
           date: body.booking.date,
           time: body.booking.time,
           partySize: body.booking.partySize,
+          areaLabel: body.booking.areaLabel,
+          areaNote: body.booking.areaNote ?? null,
         });
       } else if (body.errors) {
         setErrors(body.errors as Errors);
@@ -167,8 +183,9 @@ export default function BookingForm({
         <h4>{done.heading}</h4>
         <p>{done.body}</p>
         <p className="booking__done-slot">
-          {done.date} at {done.time} · party of {done.partySize}
+          {done.date} at {done.time} · party of {done.partySize} · {done.areaLabel}
         </p>
+        {done.areaNote && <p>{done.areaNote}</p>}
       </div>
     );
   }
@@ -176,8 +193,13 @@ export default function BookingForm({
   const errorId = (field: string) => `booking-${field}-error`;
   const describe = (field: keyof Errors) => (errors[field] ? errorId(field) : undefined);
   const errorList = Object.entries(errors).filter(([, message]) => message);
-  const timeOptions =
-    slots ?? templateTimes.map((time) => ({ time, remaining: Number.POSITIVE_INFINITY }));
+  // Until an area is chosen every slot with room anywhere is offered; once chosen, only the
+  // slots with room in that area, so the guest sees inside full while outside is not.
+  const timeOptions = slots
+    ? slots
+        .filter((s) => (area ? s.remaining[area] > 0 : true))
+        .map((s) => ({ time: s.time, remaining: area ? s.remaining[area] : null }))
+    : templateTimes.map((time) => ({ time, remaining: null }));
 
   return (
     <form
@@ -202,7 +224,9 @@ export default function BookingForm({
               <ul>
                 {errorList.map(([field, message]) => (
                   <li key={field}>
-                    <a href={`#booking-${field === "contact" ? "phone" : field}`}>
+                    <a
+                      href={`#booking-${field === "contact" ? "phone" : field === "area" ? "area-inside" : field}`}
+                    >
                       {message}
                     </a>
                   </li>
@@ -261,6 +285,44 @@ export default function BookingForm({
         </div>
       </div>
 
+      <fieldset
+        className="booking__areas"
+        data-invalid={errors.area ? "true" : undefined}
+        aria-describedby={[describe("area"), "booking-area-note"]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <legend>Where would you like to sit?</legend>
+        <div className="booking__area-options">
+          {AREAS.map((option) => (
+            <label
+              key={option}
+              className="booking__area"
+              htmlFor={`booking-area-${option}`}
+            >
+              <input
+                id={`booking-area-${option}`}
+                type="radio"
+                name="area"
+                value={option}
+                required
+                checked={area === option}
+                onChange={() => setArea(option)}
+              />
+              <span>{areaCopy[option].label}</span>
+            </label>
+          ))}
+        </div>
+        <p className="booking__hint" id="booking-area-note">
+          {areaCopy.outside.note}
+        </p>
+        {errors.area && (
+          <p className="booking__error" id={errorId("area")}>
+            {errors.area}
+          </p>
+        )}
+      </fieldset>
+
       <div className="booking__row">
         <div className="booking__field">
           <label htmlFor="booking-date">Date</label>
@@ -303,15 +365,15 @@ export default function BookingForm({
             {timeOptions.map((s) => (
               <option key={s.time} value={s.time}>
                 {s.time}
-                {Number.isFinite(s.remaining) && s.remaining <= 4
-                  ? ` — ${s.remaining} left`
-                  : ""}
+                {s.remaining !== null && s.remaining <= 4 ? ` — ${s.remaining} left` : ""}
               </option>
             ))}
           </select>
-          {slots && slots.length === 0 && (
+          {slots && timeOptions.length === 0 && (
             <p className="booking__hint">
-              No tables left online that day — please try another date or call us.
+              {area
+                ? `No ${area} tables left online that day — please try the other area, another date, or call us.`
+                : "No tables left online that day — please try another date or call us."}
             </p>
           )}
           {slotsState === "failed" && (

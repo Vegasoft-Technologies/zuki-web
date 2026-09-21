@@ -1,4 +1,11 @@
-import { bookingCopy, type BookingRules, type ConfirmationMode } from "./config.ts";
+import {
+  AREAS,
+  areaCopy,
+  bookingCopy,
+  type Area,
+  type BookingRules,
+  type ConfirmationMode,
+} from "./config.ts";
 import type { Notifier } from "./notifier.ts";
 import type { RateLimiter } from "./rateLimit.ts";
 import { availableSlots } from "./slots.ts";
@@ -69,11 +76,21 @@ export function createBookingHandlers(deps: Deps) {
     const slots = availableSlots(date, deps.rules, now());
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date))
       return json({ error: "date is required, YYYY-MM-DD" }, 400);
+    // Reported per area, so the form can show that inside is full while outside is not.
     const withRoom = [];
     for (const slot of slots) {
-      const used = await deps.store.coversDuring(slot.date, slot.startsAt, slot.endsAt);
-      const remaining = Math.max(0, deps.rules.coversPerSitting - used);
-      if (remaining > 0) withRoom.push({ time: slot.time, remaining });
+      const remaining = {} as Record<Area, number>;
+      for (const area of AREAS) {
+        const used = await deps.store.coversDuring(
+          slot.date,
+          slot.startsAt,
+          slot.endsAt,
+          area,
+        );
+        remaining[area] = Math.max(0, deps.rules.coversPerSitting[area] - used);
+      }
+      if (AREAS.some((area) => remaining[area] > 0))
+        withRoom.push({ time: slot.time, remaining });
     }
     return json({ date, slots: withRoom, maxPartyOnline: deps.rules.maxPartyOnline });
   }
@@ -141,15 +158,17 @@ export function createBookingHandlers(deps: Deps) {
     const result = validate(input, deps.rules, now());
     if (!result.ok) return fail(400, result.errors);
 
+    const { area } = result.value;
+    const where = areaCopy[area].label.toLowerCase();
     const reserved = await deps.store.reserve(
       { ...result.value, status: deps.mode === "instant" ? "confirmed" : "requested" },
-      deps.rules.coversPerSitting,
+      deps.rules.coversPerSitting[area],
     );
     if (!reserved.ok) {
       const message =
         reserved.remaining > 0
-          ? `Only ${reserved.remaining} ${reserved.remaining === 1 ? "seat is" : "seats are"} left at that time — please choose another time or a smaller party.`
-          : "That time has just filled up — please choose another.";
+          ? `Only ${reserved.remaining} ${reserved.remaining === 1 ? "seat is" : "seats are"} left ${where} at that time — please choose another time, the other area, or a smaller party.`
+          : `That time has just filled up ${where} — please choose another time or the other area.`;
       return fail(409, { time: message }, { remaining: reserved.remaining });
     }
 
@@ -165,6 +184,9 @@ export function createBookingHandlers(deps: Deps) {
       date: booking.slot.date,
       time: booking.slot.time,
       partySize: booking.partySize,
+      area: booking.area,
+      areaLabel: areaCopy[booking.area].label,
+      areaNote: areaCopy[booking.area].note,
       status: booking.status,
     };
     if (html) {
@@ -173,6 +195,7 @@ export function createBookingHandlers(deps: Deps) {
         date: booking.slot.date,
         time: booking.slot.time,
         party: String(booking.partySize),
+        area: booking.area,
       });
     }
     return json(
