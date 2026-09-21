@@ -94,6 +94,16 @@ consent box is needed for this and none is shown. It is not a marketing consent 
 not used as one: no newsletter checkbox, nothing pre-ticked, nothing sent beyond the
 booking itself.
 
+**The free-text note may contain special category data.** It is labelled "Anything we
+should know?" beside a menu that invites guests to mention allergies, so it predictably
+collects dietary, allergy and accessibility needs — health information under UK GDPR
+Article 9, which the contract basis above does not cover on its own. The system treats it
+accordingly: the note is used only to prepare for that one visit, it is shown only to the
+café, it is never copied into any other system (no spreadsheet, no message thread, no
+customer list), and it is deleted with the booking. Whoever operates the system must keep
+to that, and if the retention period below ever changes, the note changes with it — it is
+never kept longer than the booking.
+
 Retention: **30 days after the sitting date** (provisional), then deleted. Long enough to
 handle a no-show or a query; short enough that the database never becomes a customer
 list.

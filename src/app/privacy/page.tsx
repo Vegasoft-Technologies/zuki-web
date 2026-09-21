@@ -16,7 +16,7 @@ export default function PrivacyPage() {
         ← Back to Zuki&apos;s
       </Link>
       <h1>Privacy &amp; Cookie Policy</h1>
-      <p className="legal__updated">Last updated: 20 September 2026</p>
+      <p className="legal__updated">Last updated: 21 September 2026</p>
 
       <p>
         This policy explains how <strong>Zuki&apos;s Caffetteria</strong> (&quot;we&quot;,
@@ -51,6 +51,13 @@ export default function PrivacyPage() {
           <strong>Why:</strong> to hold your table and to contact you about that booking.
           Nothing else. We do not use these details for marketing and we do not add you to
           any list.
+        </li>
+        <li>
+          <strong>Your note:</strong> the optional note may include things like a food
+          allergy, a dietary need or an accessibility need, which is health information.
+          We use it only to serve that one booking — to prepare your table and your food —
+          and for nothing else. It is not copied anywhere, and it is deleted with the rest
+          of the booking, 30 days after the date of your visit.
         </li>
         <li>
           <strong>Lawful basis:</strong> the booking is a step towards a contract you have
