@@ -62,11 +62,20 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # The Worker's own log lines (notification sent or failed, with the booking reference)
+      # are streamed during the part and kept with the results.
       - name: Booking checks (${{ matrix.part }})
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: mkdir -p results && bash scripts/verify/booking.sh "${{ inputs.url }}" "${{ matrix.part }}" | tee "results/booking-${{ matrix.part }}.txt"
+        run: |
+          mkdir -p results
+          npx wrangler tail zuki-web --format json > "results/worker-log-${{ matrix.part }}.json" 2>&1 &
+          sleep 10
+          bash scripts/verify/booking.sh "${{ inputs.url }}" "${{ matrix.part }}" | tee "results/booking-${{ matrix.part }}.txt"
+          sleep 8
+          kill %1 2>/dev/null || true
+          grep -o '"message":\[[^]]*\]' "results/worker-log-${{ matrix.part }}.json" | grep -i booking | tee -a "results/booking-${{ matrix.part }}.txt" || true
       - uses: actions/upload-artifact@v4
         with:
           name: results-booking-${{ matrix.part }}
