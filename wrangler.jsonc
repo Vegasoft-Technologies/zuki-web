@@ -32,7 +32,7 @@
     {
       "binding": "DB",
       "database_name": "zuki-web-bookings",
-      "database_id": "to-be-created",
+      "database_id": "42f937b7-8fb9-42b6-acd4-01f81160267c",
       "migrations_dir": "migrations",
     },
   ],
