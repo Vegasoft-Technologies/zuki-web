@@ -75,7 +75,7 @@ jobs:
           bash scripts/verify/booking.sh "${{ inputs.url }}" "${{ matrix.part }}" | tee "results/booking-${{ matrix.part }}.txt"
           sleep 8
           kill %1 2>/dev/null || true
-          grep -o '"message":\[[^]]*\]' "results/worker-log-${{ matrix.part }}.json" | grep -i booking | tee -a "results/booking-${{ matrix.part }}.txt" || true
+          grep -o 'booking\][^"]*' "results/worker-log-${{ matrix.part }}.json" | sed 's/^/worker log: [/' | tee -a "results/booking-${{ matrix.part }}.txt" || true
       - uses: actions/upload-artifact@v4
         with:
           name: results-booking-${{ matrix.part }}
