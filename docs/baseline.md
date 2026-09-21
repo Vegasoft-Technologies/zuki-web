@@ -454,3 +454,67 @@ confirmed from the mailbox.
 
 A failed notice is found by searching the Worker's logs (observability is on) for
 `notification failed`; the line carries the booking reference, and the row is in D1.
+
+## 2026-09-21 — Confirmed rules, seating areas and instant confirmation
+
+The café's rules are applied (#78), guests choose inside or outside with capacity per
+area (#79), the deployed site confirms instantly (#80), and the notice is sent as text
+and HTML from one set of fields (#83). **No verification in this work posted to the
+deployed endpoint**: every booking there sends a real notice, so booking behaviour was
+verified by the unit and integration tests, and the deployed checks were read-only (the
+`Verify deployment` workflow with `parts='[]'`, which skips every booking job).
+
+### From the tests (in-memory store and D1 locally, logging notifier)
+
+Slot list per day beside that day's kitchen time; the last slot is the latest whose
+45-minute sitting ends before the kitchen closes:
+
+```
+Monday     café 08:00–17:00  kitchen until 16:00  | 08:00 09:00 10:00 11:00 12:00 13:00 14:00 15:00
+Tuesday    café 08:00–17:00  kitchen until 16:00  | 08:00 09:00 10:00 11:00 12:00 13:00 14:00 15:00
+Wednesday  café 08:00–17:00  kitchen until 16:00  | 08:00 09:00 10:00 11:00 12:00 13:00 14:00 15:00
+Thursday   café 08:00–17:00  kitchen until 16:00  | 08:00 09:00 10:00 11:00 12:00 13:00 14:00 15:00
+Friday     café 08:00–17:00  kitchen until 16:00  | 08:00 09:00 10:00 11:00 12:00 13:00 14:00 15:00
+Saturday   café 09:00–17:00  kitchen until 15:00  | 09:00 10:00 11:00 12:00 13:00 14:00
+Sunday     café 10:00–16:00  kitchen until 15:00  | 10:00 11:00 12:00 13:00 14:00
+```
+
+- After the kitchen closes (16:00 on a weekday, 15:00 on a Saturday), inside the 30-minute
+  notice, beyond the seven-day window, over six guests, and with no area: each rejected on
+  its own field (`time`, `time`, `date`, `partySize`, `area`).
+- Inside filled to 22 rejects the twenty-third inside guest while outside still accepts;
+  outside filled to 15 rejects the next outside guest while inside still accepts.
+- Twenty simultaneous requests for the last inside seat: exactly one succeeds, nineteen
+  are refused, and the database holds exactly 22 inside covers for that slot (D1 and the
+  in-memory store).
+- Every stored booking answers with the confirmed wording and a notice whose subject ends
+  "— confirmed" and whose first line begins "This table is CONFIRMED"; every rejection
+  answers 400 or 409, stores nothing, notifies nobody, and contains none of that wording.
+- The notice names the area on its own line and in the subject; the weather note appears
+  only for outside. The text part carries the reference, area, date, time and party size;
+  the HTML part is built from the same fields; neither contains a link, an image, a
+  tracking pixel, a shortened link, a remote resource or an unsubscribe line.
+
+### On the deployed site, read-only (run 35605100918; booking jobs skipped)
+
+At 375, 768 and 1280: the form asks "Where would you like to sit?" with Inside and Outside
+as 104–122 × 46 px targets and the weather note beneath; before a date is chosen it offers
+08:00 to 15:00, the union of every day's slots; the text before the button reads "Your
+table is held the moment you submit…" and the button "Book a table"; the menu note reads
+"Full menu served all day till 4pm Monday to Friday and 3pm Saturday and Sunday."; the hours
+rows show kitchen until 16:00 Monday to Friday and 15:00 Saturday and Sunday. No third-party
+host, no cookie, no console message. Captures:
+`docs/screenshots/booking-area-deployed-{375,768,1280}.png`. The live database held 0
+bookings before and after.
+
+The rating badge read "4.6 · 282 reviews" on this run, one more than at deployment: the
+daily revalidation through the KV cache is working.
+
+### Mail authentication
+
+One of three test notices on 2026-09-21 landed in spam. The domain is newly verified with
+no sending history. In our control: the message now carries a plain-text part beside the
+HTML, built from the same fields (#83), and the DMARC policy is to move from
+`p=none` to `p=quarantine` with reporting. The DNS record lives in the Cloudflare account
+that holds the zone, not the Vegasoft account, so the change is made by hand there; the
+date and the verified record are recorded here once it is.
