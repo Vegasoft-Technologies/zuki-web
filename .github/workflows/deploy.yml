@@ -58,7 +58,7 @@ jobs:
         env:
           GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
           GOOGLE_PLACE_ID: ChIJRxz9-QClbUgRigJpc1wN0pc
-          BOOKING_CONFIRMATION: manual
+          BOOKING_CONFIRMATION: instant
         run: npx opennextjs-cloudflare build
 
       - name: Deploy to the Worker

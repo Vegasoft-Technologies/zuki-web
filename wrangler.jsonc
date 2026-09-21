@@ -14,7 +14,7 @@
   // Plain configuration. Secrets are never listed here.
   "vars": {
     "GOOGLE_PLACE_ID": "ChIJRxz9-QClbUgRigJpc1wN0pc",
-    "BOOKING_CONFIRMATION": "manual",
+    "BOOKING_CONFIRMATION": "instant",
   },
   // The incremental cache: prerendered pages and their fetched data, so that the rating's
   // daily revalidation actually revalidates instead of being fixed at build time. Workers
