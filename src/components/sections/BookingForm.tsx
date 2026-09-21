@@ -187,6 +187,9 @@ export default function BookingForm({
       noValidate
       onSubmit={onSubmit}
       aria-describedby="booking-policy"
+      // Session recordings must never contain what a visitor types here. The form is
+      // masked as a whole and each field again on its own, so no default is relied on.
+      data-clarity-mask="true"
     >
       <p className="booking__policy" id="booking-policy">
         {copy.beforeSubmit}
@@ -217,6 +220,7 @@ export default function BookingForm({
         <div className="booking__field">
           <label htmlFor="booking-name">Name</label>
           <input
+            data-clarity-mask="true"
             id="booking-name"
             name="name"
             type="text"
@@ -236,6 +240,7 @@ export default function BookingForm({
         <div className="booking__field">
           <label htmlFor="booking-partySize">People</label>
           <select
+            data-clarity-mask="true"
             id="booking-partySize"
             name="partySize"
             required
@@ -265,6 +270,7 @@ export default function BookingForm({
         <div className="booking__field">
           <label htmlFor="booking-date">Date</label>
           <input
+            data-clarity-mask="true"
             id="booking-date"
             name="date"
             type="date"
@@ -289,6 +295,7 @@ export default function BookingForm({
         <div className="booking__field">
           <label htmlFor="booking-time">Time</label>
           <select
+            data-clarity-mask="true"
             id="booking-time"
             name="time"
             required
@@ -333,6 +340,7 @@ export default function BookingForm({
           <div className="booking__field">
             <label htmlFor="booking-phone">Telephone</label>
             <input
+              data-clarity-mask="true"
               id="booking-phone"
               name="phone"
               type="tel"
@@ -351,6 +359,7 @@ export default function BookingForm({
           <div className="booking__field">
             <label htmlFor="booking-email">Email</label>
             <input
+              data-clarity-mask="true"
               id="booking-email"
               name="email"
               type="email"
@@ -376,13 +385,20 @@ export default function BookingForm({
 
       <div className="booking__field">
         <label htmlFor="booking-note">Anything we should know? (optional)</label>
-        <textarea id="booking-note" name="note" rows={2} maxLength={300} />
+        <textarea
+          id="booking-note"
+          name="note"
+          rows={2}
+          maxLength={300}
+          data-clarity-mask="true"
+        />
       </div>
 
       {/* Real visitors never see this field. Anything that fills it is not a person. */}
       <div className="booking__hp" aria-hidden="true">
         <label htmlFor="booking-website">Website</label>
         <input
+          data-clarity-mask="true"
           id="booking-website"
           name="website"
           type="text"

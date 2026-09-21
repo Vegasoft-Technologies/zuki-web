@@ -6,6 +6,7 @@ import SiteHeader from "@/components/layout/SiteHeader";
 import SiteFooter from "@/components/layout/SiteFooter";
 import BookingBar from "@/components/layout/BookingBar";
 import CookieBanner from "@/components/ui/CookieBanner";
+import Analytics from "@/components/ui/Analytics";
 import RatingBadge from "@/components/ui/RatingBadge";
 import { buildStructuredData } from "@/lib/structuredData";
 import { site } from "@/data/site";
@@ -93,6 +94,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteFooter />
         <BookingBar />
         <CookieBanner />
+        <Analytics />
       </body>
     </html>
   );

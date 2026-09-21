@@ -340,3 +340,36 @@ Chrome had been choosing the PNG over the SVG when the PNG carried no `sizes`; w
 small PNGs offered it takes the SVG alone. Safari fetched the logo twice, once for each
 link that pointed at it. Neither browser fetched the touch icon on an ordinary page load
 in this test; it is 5,084 B when it is fetched.
+
+## 2026-09-21 — Analytics behind consent: page weight before and after
+
+Microsoft Clarity is loaded only after "Accept all". Requests and bytes on the home page
+with **no consent choice made**, production builds served locally, fresh browser context,
+no scrolling, three seconds after `load`; the previous build (`main` before the change)
+and this one were measured side by side with the same script, twice each, and the two
+runs agreed exactly.
+
+| State                   | Width   | Requests | Bytes       | Third-party hosts | Cookies |
+| ----------------------- | ------- | -------- | ----------- | ----------------- | ------- |
+| Before the change       | 375 px  | 19       | 1,010,721 B | none              | none    |
+| Before the change       | 1280 px | 19       | 1,010,721 B | none              | none    |
+| After, no choice        | 375 px  | 19       | 1,012,690 B | none              | none    |
+| After, no choice        | 1280 px | 19       | 1,012,690 B | none              | none    |
+| After, "Essential only" | 375 px  | 19       | 1,012,690 B | none              | none    |
+
+The request count before consent is unchanged. The page is 1,969 B heavier before
+consent (559 B of HTML for the longer banner sentence and the privacy page's withdrawal
+control, 1,410 B of script for the two client components that read the stored choice).
+That is the cost of the gate itself; nothing from the provider is fetched.
+
+After "Accept all", one request is added: the tag at `www.clarity.ms/tag/<project id>`,
+loaded `async` after the page's `load` event and the browser's next idle period. On the
+next page load with the choice stored it loads again without asking. **The after-consent
+weight was measured with a stand-in project identifier, because the project does not yet
+exist**; the real tag's size, the requests it makes and its cookies (`_clck`, `_clsk`) are
+to be recorded here once the project is created. Without a project identifier configured,
+"Accept all" loads nothing at all: 0 third-party requests, 0 scripts, 0 cookies.
+
+Withdrawing consent on `/privacy` clears the stored choice, sends Clarity the
+consent-withdrawn signal, and reloads: after the reload there are 0 third-party
+requests, 0 Clarity scripts, no stored choice, and the banner is shown again.

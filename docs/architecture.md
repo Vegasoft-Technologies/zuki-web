@@ -54,12 +54,12 @@ is that a phone receives a 384-pixel AVIF where it used to receive a 1440-pixel 
    visit. Each reads what it needs from `src/data/`.
 4. The HTML that arrives is complete and readable with JavaScript switched off, except
    for three values that depend on the clock or on stored state — see below.
-5. React hydrates. The nine client components attach their behaviour, the three deferred
+5. React hydrates. The eleven client components attach their behaviour, the three deferred
    values fill in, and sections fade in as they scroll into view.
 
 ## Which components run in the browser, and why
 
-Everything is a server component unless it needs the browser. Nine do:
+Everything is a server component unless it needs the browser. Eleven do:
 
 | Component              | Why                                                                                                                                                                                                 |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -72,6 +72,8 @@ Everything is a server component unless it needs the browser. Nine do:
 | `ui/CurrentYear`       | The clock, again: the footer copyright year.                                                                                                                                                        |
 | `ui/CookieBanner`      | Reads and writes the stored consent choice.                                                                                                                                                         |
 | `ui/LazyMap`           | Holds whether the map has been asked for, and reads the stored consent.                                                                                                                             |
+| `ui/Analytics`         | Reads the stored consent and, only on "Accept all", adds the Microsoft Clarity tag after the page has loaded. Renders nothing.                                                                      |
+| `ui/ConsentReset`      | The button on the privacy page that withdraws the choice: clears it, tells Clarity to delete its cookies, reloads.                                                                                  |
 
 `MenuTabs` is worth a note. Marking `MenuSection` as a client component would have
 pulled `menu.ts` — 27 KB of data — plus three more components into the browser bundle,
