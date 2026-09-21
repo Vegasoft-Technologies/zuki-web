@@ -49,7 +49,10 @@ jobs:
 
   # The booking checks post to the live endpoint, which allows five posts per address per
   # ten minutes, so each part runs on its own runner and therefore from its own address.
+  # Every booking they make sends a real notice, so they run only when asked for: pass
+  # parts '[]' for a read-only run.
   booking:
+    if: inputs.parts != '[]'
     strategy:
       fail-fast: false
       matrix:
@@ -83,7 +86,7 @@ jobs:
 
   cleanup:
     needs: booking
-    if: always()
+    if: always() && inputs.parts != '[]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

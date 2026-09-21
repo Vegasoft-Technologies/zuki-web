@@ -135,6 +135,43 @@ const KEY = process.env.PLACES_KEY || "";
       assetsChecked++;
       if (html.includes(KEY)) keyHits++;
     }
+    // Booking form, read-only: the area choice, the offered times against the kitchen, the copy.
+    await page
+      .locator(".booking__areas")
+      .scrollIntoViewIfNeeded()
+      .catch(() => {});
+    await page.waitForTimeout(400);
+    const form = await page.evaluate(() => {
+      const r = (el) => {
+        const b = el.getBoundingClientRect();
+        return [Math.round(b.width), Math.round(b.height)];
+      };
+      const areas = document.querySelector(".booking__areas");
+      return {
+        areaLegend: areas?.querySelector("legend")?.textContent ?? null,
+        areaOptions: [...document.querySelectorAll(".booking__area")].map((l) => ({
+          label: l.textContent.trim(),
+          size: r(l),
+        })),
+        weatherNote: document.getElementById("booking-area-note")?.textContent ?? null,
+        timesOffered: [...document.querySelectorAll("#booking-time option")]
+          .map((o) => o.value)
+          .filter(Boolean),
+        beforeSubmit: document.getElementById("booking-policy")?.textContent ?? null,
+        submitLabel:
+          document.querySelector("form.booking button[type=submit]")?.textContent ?? null,
+        menuNote:
+          document.querySelector(".menu__note")?.textContent?.split("Add a")[0].trim() ??
+          null,
+        kitchenRows: [...document.querySelectorAll(".hours tr")].map((tr) =>
+          tr.textContent.replace(/\s+/g, " ").trim(),
+        ),
+      };
+    });
+    await page
+      .locator(".booking__areas")
+      .screenshot({ path: `results/form-area-${w}.png` })
+      .catch(() => {});
     out[w] = {
       status: resp.status(),
       server: resp.headers()["server"],
@@ -160,6 +197,7 @@ const KEY = process.env.PLACES_KEY || "";
       },
       injectedScript: responses.some((r) => r.path.includes("/cdn-cgi/")),
       keyInAssets: KEY ? `${keyHits} of ${assetsChecked}` : "no key given",
+      form,
       console: errors,
     };
     await ctx.close();
