@@ -436,3 +436,21 @@ availability; 12 of 12 covers refuse a party of 1 (`remaining: 0`); 10 of 12 ref
 party of 3 with `Only 2 seats are left…` (`remaining: 2`); two simultaneous requests for
 the last cover give `201` and `409` with exactly 12 covers stored; the four field-level
 rejections each land on their own field.
+
+## 2026-09-21 — Booking notices by email, verified on the deployed site
+
+Notices go out through Resend to an internal address until go-live
+(`docs/decisions/0007`). Verified by the `Verify deployment` workflow's `persist` part
+with the Worker's log streamed on the runner; the sending key is send-only, so Resend's
+API cannot list messages, and arrival, Reply-To, spam placement and the field list are
+confirmed from the mailbox.
+
+| Check                                   | Result                                                                                                                                                                       |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Booking with the correct key            | `201`, row `bk-mub8dmk2-prrz5z` in D1; Worker log `notification sent … message 01a0c3f9-2966-751f-a1ef-da621d4ddeab`                                                         |
+| Booking with the key deliberately wrong | `201`, row `bk-mub85iar-8gwyl2` in D1, visitor answered `{"ok":true …}`; Worker log `notification failed for bk-mub85iar-8gwyl2 (2026-09-25 12:00): provider answered 401 …` |
+| Key restored, booking again             | `201`, notice sent                                                                                                                                                           |
+| Clean-up                                | after every run: 0 bookings, 0 `rate_limit_hits`                                                                                                                             |
+
+A failed notice is found by searching the Worker's logs (observability is on) for
+`notification failed`; the line carries the booking reference, and the row is in D1.
