@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import logo from "../../../public/images/logo.png";
 import MobileMenu from "./MobileMenu";
+import BookTableLink from "@/components/ui/BookTableLink";
 import { site } from "@/data/site";
 
 // This is a client component because the burger button and the menu it opens sit in
@@ -86,9 +86,9 @@ export default function SiteHeader({ rating }: SiteHeaderProps) {
           <a href="#visit">Visit</a>
         </nav>
 
-        <Link className="btn btn--small" href="/#book">
+        <BookTableLink className="btn btn--small">
           <span className="btn__dot" aria-hidden="true"></span> Book a table
-        </Link>
+        </BookTableLink>
 
         <button
           className="nav__toggle"

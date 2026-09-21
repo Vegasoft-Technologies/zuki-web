@@ -6,14 +6,14 @@
  *
  * It opens the booking form in the Visit section.
  */
-import Link from "next/link";
+import BookTableLink from "@/components/ui/BookTableLink";
 
 export default function BookingBar() {
   return (
     <div className="booking-bar">
-      <Link className="btn btn--gold booking-bar__action" href="/#book">
+      <BookTableLink className="btn btn--gold booking-bar__action">
         <span className="btn__dot" aria-hidden="true"></span> Book a table
-      </Link>
+      </BookTableLink>
     </div>
   );
 }
