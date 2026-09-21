@@ -51,6 +51,18 @@ export function parseRating(
   return { value: rating, count, source: "Google", url, fetchedAt };
 }
 
+/**
+ * Pure. How much of each of the five stars is filled, 0 to 1, so that 4.6 draws four
+ * full stars and a fifth that is 60% filled rather than a rounded-up fifth star. One
+ * number drives each fill, so any rating renders in proportion.
+ */
+export function starFills(value: number): number[] {
+  return [1, 2, 3, 4, 5].map((n) => {
+    const fill = Math.min(1, Math.max(0, value - (n - 1)));
+    return Math.round(fill * 100) / 100;
+  });
+}
+
 export async function fetchRating(): Promise<Rating | null> {
   const key = process.env.GOOGLE_PLACES_API_KEY;
   const placeId = process.env.GOOGLE_PLACE_ID;
