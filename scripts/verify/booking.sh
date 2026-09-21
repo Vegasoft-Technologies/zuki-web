@@ -47,8 +47,10 @@ limit)
   echo "== 5. the rate limit from one address =="
   echo -n "five invalid posts: "; for i in 1 2 3 4 5; do post "$(body '' 2 $D1 13:00)" | tail -1 | tr '\n' ' '; done; echo
   echo "sixth:"; curl -s -D - -o /dev/null -H "content-type: application/json" -d "$(body 'Rate Test' 2 $D1 13:00)" "$B" | grep -iE "^HTTP|retry-after"
-  echo "seventh, with forged x-forwarded-for and cf-connecting-ip headers:"
-  curl -s -D - -o /dev/null -H "content-type: application/json" -H "x-forwarded-for: 198.51.100.99" -H "cf-connecting-ip: 198.51.100.98" -d "$(body 'Rate Test' 2 $D1 13:00)" "$B" | grep -iE "^HTTP|retry-after"
+  echo "seventh, with a forged x-forwarded-for header (expected 429: the header is ignored):"
+  curl -s -D - -o /dev/null -H "content-type: application/json" -H "x-forwarded-for: 198.51.100.99" -d "$(body 'Rate Test' 2 $D1 13:00)" "$B" | grep -iE "^HTTP|retry-after"
+  echo "eighth, with a forged cf-connecting-ip header (expected 403: the edge refuses it before the Worker sees it):"
+  curl -s -D - -o /dev/null -H "content-type: application/json" -H "cf-connecting-ip: 198.51.100.98" -d "$(body 'Rate Test' 2 $D1 13:00)" "$B" | grep -iE "^HTTP|retry-after"
   echo "database, this address's hits: $(rows "select address, count(*) as hits from rate_limit_hits group by address")"
   echo "waiting for the window to pass (605 s)…"; sleep 605
   echo "after the window, an invalid post (expected 400, not 429): $(post "$(body '' 2 $D1 13:00)" | tail -1)"
