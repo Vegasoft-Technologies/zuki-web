@@ -49,6 +49,28 @@ requests for the last covers cannot both see room. The schema is versioned as SQ
 in `migrations/`. The Postgres paragraphs above are kept as the record of what was
 planned before the host was known.
 
+### The rules, as confirmed
+
+The café answered on 2026-09-21 and nothing below is provisional any longer:
+
+| Rule                 | Value                                             | Was             |
+| -------------------- | ------------------------------------------------- | --------------- |
+| Sitting              | 45 minutes                                        | 90              |
+| Slot interval        | 60 minutes                                        | 30              |
+| Largest party online | 6                                                 | 6               |
+| Booking window       | 7 days                                            | 28              |
+| Minimum notice       | 30 minutes (ours to set; see below)               | 60              |
+| Retention            | 30 days after the sitting                         | 30              |
+| Kitchen closes       | 16:00 Monday to Friday, 15:00 Saturday and Sunday | 16:00 every day |
+
+**Last seating.** The café said "one hour before closing". Applied literally that puts the
+last sitting after the kitchen has shut on every day of the week (the café closes at 17:00
+and 16:00, the kitchen at 16:00 and 15:00), so a guest would sit down and find no food.
+The rule is therefore derived, not fixed: **the last bookable slot is the latest one whose
+sitting finishes before the kitchen closes.** With a 45-minute sitting on hourly slots
+that is 15:00 Monday to Friday and 14:00 on Saturday and Sunday. It follows the kitchen
+time automatically if that ever changes.
+
 ### How the café is notified
 
 Through a `Notifier` interface with one operation: deliver a booking notice. Two

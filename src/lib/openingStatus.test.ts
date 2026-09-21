@@ -69,11 +69,20 @@ test("when the café is closed there is no kitchen line", () => {
   assert.equal(getOpeningStatus(new Date("2026-09-16T17:30:00Z")).kitchen, undefined);
 });
 
-test("on Sunday the kitchen and the café close together, so nothing extra is said", () => {
+test("on Sunday the kitchen closes an hour before the café, so the line says so", () => {
   const status = getOpeningStatus(new Date("2026-09-20T11:00:00Z")); // Sun 12:00 BST
   assert.equal(status.isOpen, true);
   assert.equal(status.detail, "until 16:00 today");
-  assert.equal(status.kitchen, undefined);
+  assert.equal(status.kitchen, "kitchen until 15:00");
+  const late = getOpeningStatus(new Date("2026-09-20T14:30:00Z")); // Sun 15:30 BST
+  assert.equal(late.kitchen, "kitchen closed for today");
+});
+
+test("on Saturday the kitchen closes at 15:00 and the café at 17:00", () => {
+  assert.equal(
+    getOpeningStatus(new Date("2026-09-19T13:59:00Z")).kitchen, // Sat 14:59 BST
+    "kitchen until 15:00",
+  );
 });
 
 test("British Summer Time is applied, not a fixed offset", () => {

@@ -3,7 +3,7 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { after, before, beforeEach, test } from "node:test";
 import { getPlatformProxy } from "wrangler";
-import { provisionalRules } from "./config.ts";
+import { bookingRules } from "./config.ts";
 import { D1BookingStore, type D1Like } from "./d1Store.ts";
 import { createBookingHandlers, forwardedAddress } from "./handlers.ts";
 import { RecordingNotifier } from "./notifier.ts";
@@ -52,7 +52,7 @@ beforeEach(async () => {
 const NOW = new Date("2026-09-21T08:00:00Z"); // Monday 09:00 London
 
 const slotAt = (time: string, date = "2026-09-22") => {
-  const check = checkSlot(date, time, provisionalRules, NOW);
+  const check = checkSlot(date, time, bookingRules, NOW);
   if (!check.ok) throw new Error(`bad slot ${date} ${time}: ${check.problem}`);
   return check.slot;
 };
@@ -82,15 +82,14 @@ test("a booking is stored and read back with the same fields", async () => {
 
 test("covers are counted only for sittings that overlap the window", async () => {
   const store = new D1BookingStore(db);
-  await store.reserve(party(4, "12:00"), 12); // 12:00–13:30
+  await store.reserve(party(4, "12:00"), 12); // 12:00–12:45
   const at = (t: string) => {
     const s = slotAt(t);
     return store.coversDuring("2026-09-22", s.startsAt, s.endsAt);
   };
-  assert.equal(await at("10:30"), 0); // ends as it starts
-  assert.equal(await at("11:00"), 4); // overlaps
-  assert.equal(await at("13:00"), 4); // overlaps
-  assert.equal(await at("13:30"), 0); // starts as it ends
+  assert.equal(await at("11:00"), 0); // ends before it starts
+  assert.equal(await at("12:00"), 4); // overlaps
+  assert.equal(await at("13:00"), 0); // starts after it ends
 });
 
 test("a full sitting refuses the next party and reports the seats left", async () => {
@@ -142,7 +141,7 @@ test("the handlers run unchanged against the D1 store", async () => {
     store,
     notifier,
     limiter: new MemoryRateLimiter(1000, 600_000),
-    rules: provisionalRules,
+    rules: bookingRules,
     mode: "instant",
     maxBodyBytes: 8 * 1024,
     now: () => NOW,
@@ -180,5 +179,5 @@ test("the handlers run unchanged against the D1 store", async () => {
   ).json();
   const times = availability.slots.map((s: { time: string }) => s.time);
   assert.ok(!times.includes("12:00"));
-  assert.ok(times.includes("13:30"));
+  assert.ok(times.includes("13:00"));
 });

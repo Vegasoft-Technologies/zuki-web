@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import {
   confirmationMode,
   maxBodyBytes,
-  provisionalRules,
+  bookingRules,
   rateLimitRules,
 } from "./config.ts";
 import { D1RateLimiter } from "./d1RateLimit.ts";
@@ -126,7 +126,7 @@ export function defaultDeps(): Deps {
     notifier: liveNotifier(),
     limiter: liveLimiter(),
     clientAddress: liveClientAddress,
-    rules: provisionalRules,
+    rules: bookingRules,
     mode: confirmationMode(),
     maxBodyBytes,
   };
