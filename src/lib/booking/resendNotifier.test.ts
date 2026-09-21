@@ -3,6 +3,12 @@ import test from "node:test";
 import { renderNotice, ResendNotifier } from "./resendNotifier.ts";
 import type { BookingRecord } from "./store.ts";
 
+/** True when the text has a line `label:   value`, whatever the column width. */
+const hasLine = (text: string, label: string, value: string) =>
+  new RegExp(`^${label}:\\s+${value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "m").test(
+    text,
+  );
+
 const booking: BookingRecord = {
   id: "bk-test-1",
   name: "Ada Lovelace",
@@ -26,19 +32,19 @@ test("the notice carries every field and says the booking awaits confirmation", 
     subject,
     "Table request: Saturday 26 September 2026, 12:30, party of 4, inside — awaiting confirmation",
   );
-  for (const expected of [
-    "AWAITING CONFIRMATION",
-    "Name:        Ada Lovelace",
-    "Party size:  4",
-    "Area:        Inside",
-    "Date:        Saturday 26 September 2026",
-    "Time:        12:30",
-    "Telephone:   +44 1392 000000",
-    "Email:       ada@example.com",
-    "Note:        One of us is coeliac; a high chair please.",
-    "Booking reference: bk-test-1",
+  assert.ok(text.includes("AWAITING CONFIRMATION"));
+  for (const [label, value] of [
+    ["Name", "Ada Lovelace"],
+    ["Party size", "4"],
+    ["Area", "Inside"],
+    ["Date", "Saturday 26 September 2026"],
+    ["Time", "12:30"],
+    ["Telephone", "+44 1392 000000"],
+    ["Email", "ada@example.com"],
+    ["Note", "One of us is coeliac; a high chair please."],
+    ["Booking reference", "bk-test-1"],
   ]) {
-    assert.ok(text.includes(expected), expected);
+    assert.ok(hasLine(text, label, value), `${label}: ${value}`);
   }
 });
 
@@ -54,7 +60,7 @@ test("a confirmed booking in instant mode says so, and an absent note is stated"
   );
   assert.match(subject, /^Table booked: .* — confirmed$/);
   assert.ok(text.includes("This table is CONFIRMED"));
-  assert.ok(text.includes("Note:        (none)"));
+  assert.ok(hasLine(text, "Note", "(none)"));
   assert.ok(!text.includes("Email:"));
 });
 
@@ -86,6 +92,7 @@ test("the message goes to the configured address with Reply-To set to it, from t
   assert.equal(body.from, "Bookings <bookings@example.org>");
   assert.match(body.subject, /awaiting confirmation/);
   assert.ok(body.text.includes("Ada Lovelace"));
+  assert.ok(body.html.includes("Ada Lovelace"));
 });
 
 test("a provider error or an unreachable provider is logged and never thrown", async () => {
@@ -127,8 +134,51 @@ test("the area is on its own line, the subject names it, and the weather note ap
   const outside = renderNotice({ ...booking, area: "outside" }, "manual");
   assert.match(outside.subject, /, outside — /);
   assert.ok(
-    outside.text.includes(
-      "Area:        Outside — Our outside tables are under the open sky, so they depend on the weather on the day.",
+    hasLine(
+      outside.text,
+      "Area",
+      "Outside — Our outside tables are under the open sky, so they depend on the weather on the day.",
     ),
   );
+});
+
+test("the plain-text part carries the reference, the area, the date, the time and the party size", () => {
+  const { text } = renderNotice(booking, "instant");
+  assert.ok(hasLine(text, "Booking reference", "bk-test-1"));
+  assert.ok(hasLine(text, "Area", "Inside"));
+  assert.ok(hasLine(text, "Date", "Saturday 26 September 2026"));
+  assert.ok(hasLine(text, "Time", "12:30"));
+  assert.ok(hasLine(text, "Party size", "4"));
+});
+
+test("the HTML part is built from the same fields as the text and escapes what the guest typed", () => {
+  const spiky = {
+    ...booking,
+    name: 'Ada <b>"Lovelace"</b> & co',
+    note: "<script>x</script>",
+  };
+  const { text, html } = renderNotice(spiky, "instant");
+  // every text field value appears in the HTML, escaped
+  assert.ok(html.includes("Ada &lt;b&gt;&quot;Lovelace&quot;&lt;/b&gt; &amp; co"));
+  assert.ok(html.includes("&lt;script&gt;x&lt;/script&gt;"));
+  assert.ok(!html.includes("<script>"));
+  for (const value of [
+    "bk-test-1",
+    "Saturday 26 September 2026",
+    "12:30",
+    "Inside",
+    "+44 1392 000000",
+    "ada@example.com",
+  ]) {
+    assert.ok(text.includes(value) && html.includes(value), value);
+  }
+});
+
+test("the notice reads as a transactional message: no links, images, tracking or footer in either part", () => {
+  const { text, html } = renderNotice(booking, "instant");
+  for (const part of [text, html]) {
+    assert.doesNotMatch(part, /https?:\/\//i, "no link or remote resource");
+    assert.doesNotMatch(part, /unsubscribe|opt[- ]?out|preferences|view in browser/i);
+  }
+  assert.doesNotMatch(html, /<img|<a |<link|<style|@import|background:url/i);
 });

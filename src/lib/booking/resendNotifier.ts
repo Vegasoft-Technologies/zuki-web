@@ -26,7 +26,10 @@ export interface ResendConfig {
 
 export interface Notice {
   subject: string;
+  /** The plain-text part. */
   text: string;
+  /** The HTML part, built from the same fields as the text so the two cannot disagree. */
+  html: string;
 }
 
 const DAY_NAMES = [
@@ -51,9 +54,21 @@ function longDate(date: string): string {
   })}`;
 }
 
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
 /**
  * Pure. Everything the café needs to act on the booking without opening anything else,
- * and a plain statement of whether the table is confirmed or awaiting confirmation.
+ * and a plain statement of whether the table is confirmed or awaiting confirmation. The
+ * fields are assembled once and both parts are rendered from them.
+ *
+ * The message is transactional and reads as one: no footer, no unsubscribe line, no
+ * tracking image, no shortened link, no image or stylesheet loaded from anywhere, and no
+ * link at all — the only address in it is the Reply-To header.
  */
 export function renderNotice(booking: BookingRecord, mode: ConfirmationMode): Notice {
   const confirmed = mode === "instant" && booking.status === "confirmed";
@@ -62,29 +77,46 @@ export function renderNotice(booking: BookingRecord, mode: ConfirmationMode): No
   const area = areaCopy[booking.area];
   const state = confirmed ? "CONFIRMED" : "AWAITING CONFIRMATION";
   const subject = `${confirmed ? "Table booked" : "Table request"}: ${when}, ${party}, ${area.label.toLowerCase()} — ${state.toLowerCase()}`;
-  const contact = [
-    booking.contact.phone ? `Telephone: ${booking.contact.phone}` : null,
-    booking.contact.email ? `Email: ${booking.contact.email}` : null,
-  ].filter((line): line is string => line !== null);
-  const lines = [
-    confirmed
-      ? "This table is CONFIRMED. The guest has been told it is held; nothing more is needed unless something changes."
-      : "This is a REQUEST, AWAITING CONFIRMATION. The guest has been told the café will confirm by the contact method below. Please confirm or decline with them.",
-    "",
-    `Name:        ${booking.name}`,
-    `Party size:  ${booking.partySize}`,
-    `Area:        ${area.label}${area.note ? ` — ${area.note}` : ""}`,
-    `Date:        ${longDate(booking.slot.date)}`,
-    `Time:        ${booking.slot.time}`,
-    ...contact.map((line) => `${line.split(":")[0]}:`.padEnd(13) + line.split(": ")[1]),
-    `Note:        ${booking.note ? booking.note : "(none)"}`,
-    "",
-    `Booking reference: ${booking.id}`,
-    `Received: ${booking.createdAt.toISOString()}`,
-    "",
-    "Reply to this email to reach the person who looks after bookings. The note may contain dietary or accessibility information: use it only for this booking and do not copy it elsewhere.",
+  const opening = confirmed
+    ? "This table is CONFIRMED. The guest has been told it is held; nothing more is needed unless something changes."
+    : "This is a REQUEST, AWAITING CONFIRMATION. The guest has been told the café will confirm by the contact method below. Please confirm or decline with them.";
+  const fields: [string, string][] = [
+    ["Name", booking.name],
+    ["Party size", String(booking.partySize)],
+    ["Area", `${area.label}${area.note ? ` — ${area.note}` : ""}`],
+    ["Date", longDate(booking.slot.date)],
+    ["Time", booking.slot.time],
+    ...(booking.contact.phone
+      ? [["Telephone", booking.contact.phone] as [string, string]]
+      : []),
+    ...(booking.contact.email
+      ? [["Email", booking.contact.email] as [string, string]]
+      : []),
+    ["Note", booking.note ? booking.note : "(none)"],
+    ["Booking reference", booking.id],
+    ["Received", booking.createdAt.toISOString()],
   ];
-  return { subject, text: lines.join("\n") };
+  const closing =
+    "Reply to this email to reach the person who looks after bookings. The note may contain dietary or accessibility information: use it only for this booking and do not copy it elsewhere.";
+
+  const width = Math.max(...fields.map(([label]) => label.length)) + 2;
+  const text = [
+    opening,
+    "",
+    ...fields.map(([label, value]) => `${label}:`.padEnd(width) + value),
+    "",
+    closing,
+  ].join("\n");
+
+  const rows = fields
+    .map(
+      ([label, value]) =>
+        `<tr><th align="left" style="padding:2px 12px 2px 0;font-weight:600">${escapeHtml(label)}</th><td style="padding:2px 0">${escapeHtml(value)}</td></tr>`,
+    )
+    .join("");
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${escapeHtml(subject)}</title></head><body style="font-family:system-ui,sans-serif;font-size:15px;line-height:1.45;color:#222"><p><strong>${escapeHtml(opening)}</strong></p><table role="presentation" cellpadding="0" cellspacing="0" border="0">${rows}</table><p>${escapeHtml(closing)}</p></body></html>`;
+
+  return { subject, text, html };
 }
 
 export class ResendNotifier implements Notifier {
@@ -95,7 +127,7 @@ export class ResendNotifier implements Notifier {
   }
 
   async bookingReceived(booking: BookingRecord, mode: ConfirmationMode): Promise<void> {
-    const { subject, text } = renderNotice(booking, mode);
+    const { subject, text, html } = renderNotice(booking, mode);
     const doFetch = this.config.fetch ?? fetch;
     const url = new URL("/emails", this.config.baseUrl ?? "https://api.resend.com");
     try {
@@ -111,6 +143,7 @@ export class ResendNotifier implements Notifier {
           reply_to: this.config.to,
           subject,
           text,
+          html,
         }),
       });
       if (!response.ok) {
