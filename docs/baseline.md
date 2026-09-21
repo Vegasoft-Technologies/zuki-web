@@ -318,3 +318,25 @@ current, so a rerun after adding one photograph writes only that photograph's co
 The page links `/images/logo.png` (642,795 B) as its fallback icon and Apple touch icon,
 so browsers that fetch those still download the full-size PNG once per visit. It is the
 largest single image request left on the page and is a separate change.
+
+## 2026-09-21 — Icons
+
+The page offered the 642,795-byte `logo.png` as its alternate icon and as its Apple touch
+icon, so browsers that use those links fetched it on every cold load — the largest single
+image request left after image delivery was switched on. The icons are now drawn from
+`favicon.svg`: `icon-16.png`, `icon-32.png`, `icon-48.png` for browsers that do not use
+SVG icons, and `apple-touch-icon.png` at 180 × 180 on the theme colour. `favicon.svg`
+stays the primary icon and `logo.png` stays where it is used as an image in the page.
+
+Icon bytes fetched on a cold load at 375 px, production build served locally, read from a
+request log in front of the server:
+
+| Browser                               | Before                                                       | After                                                                                       |
+| ------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| Chrome 153 (uses the SVG)             | `logo.png` 642,795 B                                         | `favicon.svg` 652 B                                                                         |
+| Safari 26 (does not use the SVG icon) | `favicon.svg` 652 B + `logo.png` 642,795 B × 2 = 1,286,242 B | `icon-48.png` 1,560 + `icon-32.png` 1,121 + `icon-16.png` 646 + `favicon.svg` 652 = 3,979 B |
+
+Chrome had been choosing the PNG over the SVG when the PNG carried no `sizes`; with sized
+small PNGs offered it takes the SVG alone. Safari fetched the logo twice, once for each
+link that pointed at it. Neither browser fetched the touch icon on an ordinary page load
+in this test; it is 5,084 B when it is fetched.

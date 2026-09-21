@@ -62,12 +62,17 @@ export const metadata: Metadata = {
       "All-day breakfast, Turkish spreads, brunch, artisan gelato & proper coffee on Queen Street, Exeter.",
     images: [`${site.url}/images/gallery-14.jpg`],
   },
+  // The SVG is the primary icon. The small PNGs are for browsers that do not use SVG
+  // icons, and the 180 px PNG is the Apple touch icon; all are drawn from the same
+  // artwork. The full-size logo is no longer offered as an icon: it weighed 642 KB.
   icons: {
     icon: [
       { url: "/images/favicon.svg", type: "image/svg+xml" },
-      { url: "/images/logo.png" },
+      { url: "/images/icon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/images/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/images/icon-16.png", sizes: "16x16", type: "image/png" },
     ],
-    apple: "/images/logo.png",
+    apple: { url: "/images/apple-touch-icon.png", sizes: "180x180" },
   },
 };
 
