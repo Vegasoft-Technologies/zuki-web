@@ -10,7 +10,7 @@ rotated and removed.
 The site is deployed to a **dedicated Cloudflare account named "Vegasoft"**, separate from
 any personal account that shares the same login. In Cloudflare a login can belong to
 several accounts and switch between them, so this needs no second password. Everything
-that belongs to this project — the Worker, its R2 bucket, its Durable Object, and the D1
+that belongs to this project — the Worker, its KV namespace, its Durable Object, and the D1
 database — lives in that account and nowhere else.
 
 The account holds only this project. Granting a colleague administrator rights on it
@@ -19,7 +19,7 @@ grants them nothing else.
 | Resource                        | Where                                                                       |
 | ------------------------------- | --------------------------------------------------------------------------- |
 | Worker `zuki-web`               | Vegasoft account, Workers & Pages                                           |
-| R2 bucket `zuki-web-cache`      | Vegasoft account, R2 (the incremental cache; safe to empty)                 |
+| KV namespace `zuki-web-cache`   | Vegasoft account, Workers KV (the incremental cache; safe to empty)         |
 | Durable Object `DOQueueHandler` | Vegasoft account, bound to the Worker (revalidation queue)                  |
 | D1 database                     | Vegasoft account, D1 (bookings; holds personal data)                        |
 | Domain `zukiscaffetteria.co.uk` | A different Cloudflare account today — see `docs/decisions/0005-hosting.md` |
