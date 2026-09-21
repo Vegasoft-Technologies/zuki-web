@@ -514,7 +514,32 @@ daily revalidation through the KV cache is working.
 
 One of three test notices on 2026-09-21 landed in spam. The domain is newly verified with
 no sending history. In our control: the message now carries a plain-text part beside the
-HTML, built from the same fields (#83), and the DMARC policy is to move from
-`p=none` to `p=quarantine` with reporting. The DNS record lives in the Cloudflare account
-that holds the zone, not the Vegasoft account, so the change is made by hand there; the
-date and the verified record are recorded here once it is.
+HTML, built from the same fields (#83), and the DMARC policy was tightened by the
+repository owner in the Cloudflare account that holds the zone. Observed in public DNS on
+2026-09-21:
+
+```
+_dmarc.zukiscaffetteria.co.uk  TXT  "v=DMARC1; p=quarantine; rua=mailto:onur@vegasoft.co.uk; fo=1"
+```
+
+(was `"v=DMARC1; p=none;"`). DKIM (`resend._domainkey`) and the sending subdomain's SPF are
+unchanged. Whether Resend still shows the domain as verified is confirmed in its dashboard
+by the owner; the sending key is send-only and cannot read it.
+
+## 2026-09-21 — DNS before the cutover to the Worker (the rollback record)
+
+Public DNS and serving state of the domain, recorded before anything is changed. The
+zone is on Cloudflare nameservers `micah.ns.cloudflare.com` and `nova.ns.cloudflare.com`.
+
+| Name                            | Type  | Content                                                                                                                                   | Proxy   |
+| ------------------------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `zukiscaffetteria.co.uk`        | CNAME | `zukiscaffetteria.pages.dev` (the Pages project; resolves to Cloudflare addresses `172.67.214.241`, `104.21.83.57` because it is proxied) | proxied |
+| `www.zukiscaffetteria.co.uk`    | —     | **no record**: the name does not resolve, which is why visitors cannot reach `www`                                                        | —       |
+| `zukiscaffetteria.co.uk`        | TXT   | `google-site-verification=7GxmYmbXMNOsVfhRbRWKm1U_dzNmQ3uojwz_-fWdLQ4`                                                                    | —       |
+| `_dmarc.zukiscaffetteria.co.uk` | TXT   | as above                                                                                                                                  | —       |
+
+The apex answers `200` from Cloudflare (`server: cloudflare`, `cf-cache-status: DYNAMIC`)
+serving the old static site from the Pages project. **Rollback, under a minute:** in the
+zone's DNS, remove the Worker custom domain for the apex and re-add
+`zukiscaffetteria.co.uk CNAME zukiscaffetteria.pages.dev`, proxied; the Pages project and
+its deployment are kept for exactly this.
