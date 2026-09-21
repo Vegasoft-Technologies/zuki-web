@@ -10,9 +10,19 @@ on:
         description: The deployed address to check
         required: true
         default: https://zuki-web.vegasoft.workers.dev
+      parts:
+        description: Which booking parts to run, as a JSON array
+        required: false
+        default: '["persist", "capacity", "validation", "race", "limit", "second-address"]'
+      checks:
+        description: Run the page checks (curl, browser, Rich Results)
+        type: boolean
+        required: false
+        default: true
 
 jobs:
   checks:
+    if: inputs.checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +53,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        part: [persist, capacity, validation, race, limit, second-address]
+        part: ${{ fromJSON(inputs.parts) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
