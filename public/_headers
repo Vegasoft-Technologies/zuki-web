@@ -1,0 +1,4 @@
+# Cloudflare serves these headers with the static assets. Hashed build output never
+# changes at a given path, so it can be cached for a year.
+/_next/static/*
+  Cache-Control: public,max-age=31536000,immutable
