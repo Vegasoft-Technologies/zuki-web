@@ -71,6 +71,15 @@ sitting finishes before the kitchen closes.** With a 45-minute sitting on hourly
 that is 15:00 Monday to Friday and 14:00 on Saturday and Sunday. It follows the kitchen
 time automatically if that ever changes.
 
+### Minimum notice: 30 minutes
+
+The café left this to us. In manual mode the café needed time to see a request and
+confirm it before the guest set off, so 60 minutes was right. Instant confirmation holds
+the table itself; the only requirement left is that staff see the booking on their list
+before the guest arrives. A large share of this café's customers are passengers arriving
+at Exeter Central: 30 minutes lets someone book from the train, 60 does not. It is one
+figure, `minNoticeMinutes`, to change if the café finds it tight.
+
 ### Seating areas
 
 The café has two areas and wants guests to choose. Inside has 45 to 50 seats across 11
