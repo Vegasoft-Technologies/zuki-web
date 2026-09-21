@@ -1,10 +1,31 @@
 # Zuki's Caffetteria
 
-Website for Zuki's Caffetteria, an Italian and Turkish cafe at 3B Queen Street, Exeter
-EX4 3SB, United Kingdom. Live at <https://zukiscaffetteria.co.uk>.
+The website of Zuki's Caffetteria, an Italian and Turkish café at 3B Queen Street, Exeter
+EX4 3SB, with a live Google rating and instant table booking, served from Cloudflare
+Workers at <https://zuki-web.vegasoft.workers.dev> until the domain
+<https://zukiscaffetteria.co.uk> is connected to it.
 
-The site is being migrated from hand-written HTML, CSS and vanilla JavaScript to
-Next.js, so that a booking API and a review-fetching API can be added to it.
+| Desktop, 1280 px                                                     | Phone, 375 px                                                    |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| ![The home page at desktop width](docs/screenshots/home-desktop.png) | ![The home page at phone width](docs/screenshots/home-phone.png) |
+
+## Measured results
+
+Every figure is in [`docs/baseline.md`](docs/baseline.md) with how it was taken. The
+"after" figures were measured on the deployed site from a GitHub Actions runner in
+Seattle, behind Cloudflare, on 2026-09-21.
+
+| Measure                                | Before (client's own figures, 2026-09-18) | After (2026-09-21)                                      |
+| -------------------------------------- | ----------------------------------------- | ------------------------------------------------------- |
+| Page load (`load` event)               | 0.198 s, 0.532 s download                 | 0.570 s at 375 px, 0.577 s at 1280 px, first byte 89 ms |
+| Image weight on the home page          | 11,318,031 B at every width               | 644,175 B at 375 px 2x; 332,876 B at 768 and 1280 px    |
+| Structured data (Schema.org validator) | 0 errors                                  | 0 errors, 0 warnings; Rich Results test: 2 valid items  |
+| HTTP requests                          | 19                                        | 16–18 at `load`; 42–43 after scrolling every photo in   |
+| Cumulative layout shift                | not measured                              | 0 at 375, 768 and 1280 px                               |
+
+The site was rebuilt from hand-written HTML, CSS and JavaScript into Next.js so that a
+booking system and a review fetch could be added to it; the rendered page was kept
+identical to the original throughout, then changed only where recorded.
 
 ## Repository layout
 
