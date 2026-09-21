@@ -26,7 +26,7 @@ export default function Story() {
       <div className="story__grid">
         <Reveal className="story__text">
           <Eyebrow>The place</Eyebrow>
-          <SectionTitle>Tucked just off Queen Street, since 2017.</SectionTitle>
+          <SectionTitle>Tucked just off Queen Street, Exeter, since 2017.</SectionTitle>
           <p>
             {
               "Zuki's started with a simple idea: put two of the world's great breakfast tables next to each other and let people choose. One morning it's an espresso and a warm cornetto. The next it's a Turkish spread that fills the whole table sucuk, creamy feta, olives, honey and warm, fluffy flatbread."

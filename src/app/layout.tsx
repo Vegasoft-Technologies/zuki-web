@@ -36,9 +36,9 @@ const fontVariables = {
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title:
-    "Zuki's Caffetteria | Italian & Turkish Café in Exeter — Breakfast, Brunch & Gelato",
+    "Zuki's Caffetteria | Breakfast Café on Queen Street, Exeter — Italian & Turkish",
   description:
-    "Italian & Turkish café on Queen Street by Exeter Central Station. All-day breakfast, Turkish breakfast spreads, brunch, fresh cornetti, artisan gelato, espresso & Turkish coffee — since 2017.",
+    "Breakfast cafe on Queen Street, Exeter, next to Central Station. All-day breakfast and brunch, Turkish breakfast spreads, fresh cornetti, artisan gelato and proper coffee — since 2017.",
   alternates: {
     canonical: `${site.url}/`,
   },
