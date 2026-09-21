@@ -377,7 +377,7 @@ Test rows were written to the live database for these checks and deleted afterwa
 2. 12 of 12 covers → `409 That time has just filled up — please choose another.`, `remaining: 0`; 2 seats left, party of 3 → `409 Only 2 seats are left at that time…`, `remaining: 2`.
 3. 11 of 12 booked, two simultaneous requests for the last cover: `409` and `201`; the database holds 3 rows, 12 covers.
 4. Outside hours → `time`; inside the minimum notice → `time`; beyond the window → `date`; party of 7 → `partySize`; each alone.
-5. **The rate limit did not trigger**: eight invalid posts from one address were all `400`. The limiter is per isolate in memory and reads `x-forwarded-for` first; see issue #66. Locally the same sequence gives `429`.
+5. The rate limit did not trigger on the first deployment (issue #66): the in-memory limiter was per isolate. Fixed the same day; see the entry below.
 6. The suite passes unchanged (76 tests).
 
 ### Item 8 — the checks that needed a public address
@@ -412,3 +412,27 @@ on the deployed Worker answers the same 384 px tile as `image/avif` 22,233 B, `i
 33,618 B or `image/jpeg` 35,664 B according to `Accept`, with `Vary: Accept` and a year's
 immutable caching. Whole-page totals after scrolling, including HTML, script, fonts and
 images: 1,646,938 B at 375 px (43 requests), 1,335,639 B at 768 and 1280 px (42 requests).
+
+## 2026-09-21 — Rate limit counted in D1, verified on the deployed site
+
+Issue #66 fixed: the limit is counted in a D1 table by one guarded `INSERT`, and the
+caller's address is read only from `CF-Connecting-IP`, which the edge sets. Verified by
+the `Verify deployment` workflow (run 35591430333, Worker version `d647696c`), with each
+part on its own runner and therefore its own address; the test rows and the addresses
+were removed at the end (0 bookings, 0 `rate_limit_hits` after clean-up).
+
+| Check                                        | Result                                                                                       |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Five invalid posts from one address          | `400 400 400 400 400`                                                                        |
+| Sixth                                        | `HTTP/2 429`, `retry-after: 600`                                                             |
+| Seventh, with a forged `x-forwarded-for`     | `HTTP/2 429`, `retry-after: 600` — the header is ignored                                     |
+| Eighth, with a forged `cf-connecting-ip`     | `HTTP/2 403` — the edge refuses it before the Worker sees it                                 |
+| The table during the test                    | one row per accepted request, keyed on the runners' real addresses; the limited address at 5 |
+| A second address while the first was limited | `400` for its empty name, not `429`                                                          |
+| After the ten-minute window                  | the same address's next post is `400` again, not `429`                                       |
+
+The other booking checks were repeated on the same run: a booking persists and shows in
+availability; 12 of 12 covers refuse a party of 1 (`remaining: 0`); 10 of 12 refuse a
+party of 3 with `Only 2 seats are left…` (`remaining: 2`); two simultaneous requests for
+the last cover give `201` and `409` with exactly 12 covers stored; the four field-level
+rejections each land on their own field.
