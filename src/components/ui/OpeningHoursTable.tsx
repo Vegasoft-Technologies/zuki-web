@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatRange, openingHours } from "@/data/openingHours";
+import { formatRange, formatTime, openingHours } from "@/data/openingHours";
 import { getLondonDayIndex } from "@/lib/openingStatus";
 
 /**
@@ -26,7 +26,12 @@ export default function OpeningHoursTable() {
             className={day.day === today ? "is-today" : undefined}
           >
             <th>{day.label}</th>
-            <td>{formatRange(day)}</td>
+            <td>
+              {formatRange(day)}
+              <span className="hours__kitchen">
+                kitchen until {formatTime(day.kitchenCloses)}
+              </span>
+            </td>
           </tr>
         ))}
       </tbody>

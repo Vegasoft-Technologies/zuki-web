@@ -4,6 +4,7 @@ import SectionTitle from "@/components/ui/SectionTitle";
 import MenuPanel from "@/components/sections/MenuPanel";
 import MenuTabs from "@/components/sections/MenuTabs";
 import { menu, menuAllergyNote } from "@/data/menu";
+import { kitchenCutoffNote } from "@/data/openingHours";
 
 export default function MenuSection() {
   return (
@@ -12,7 +13,8 @@ export default function MenuSection() {
         <Eyebrow className="eyebrow--center">{"What's cooking"}</Eyebrow>
         <SectionTitle className="section-title--center">The menu</SectionTitle>
         <p className="menu__note">
-          Full menu served all day till 4pm. Add a Mimosa to your brunch for £5.95.
+          Full menu served all day till {kitchenCutoffNote}. Add a Mimosa to your brunch
+          for £5.95.
           <span className="menu__legend">
             <em className="mi__diet">V</em> vegetarian ·{" "}
             <em className="mi__diet mi__diet--vg">Vg</em> vegan ·{" "}

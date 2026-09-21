@@ -7,6 +7,12 @@ export interface OpeningStatus {
   isOpen: boolean;
   /** The part after the status word: "until 17:00 today", "opens 09:00 tomorrow". */
   detail: string;
+  /**
+   * While the café is open, whether food is still served: "kitchen until 16:00" or
+   * "kitchen closed for today". Absent when the café is closed, and on a day the
+   * kitchen and the café close together.
+   */
+  kitchen?: string;
   /** The day in London. 0 is Sunday, matching Date#getDay. */
   dayIndex: number;
 }
@@ -68,7 +74,18 @@ export function getOpeningStatus(now: Date): OpeningStatus {
   const today = openingHours.find((day) => day.day === dayIndex);
 
   if (today && minutes >= today.opens && minutes < today.closes) {
-    return { isOpen: true, detail: `until ${formatTime(today.closes)} today`, dayIndex };
+    const status: OpeningStatus = {
+      isOpen: true,
+      detail: `until ${formatTime(today.closes)} today`,
+      dayIndex,
+    };
+    if (today.kitchenCloses < today.closes) {
+      status.kitchen =
+        minutes < today.kitchenCloses
+          ? `kitchen until ${formatTime(today.kitchenCloses)}`
+          : "kitchen closed for today";
+    }
+    return status;
   }
 
   if (today && minutes < today.opens) {

@@ -41,6 +41,41 @@ test("the exact minute of opening counts as open", () => {
   assert.equal(status.detail, "until 17:00 today");
 });
 
+test("while food is served the line says when the kitchen closes", () => {
+  const status = getOpeningStatus(new Date("2026-09-16T09:30:00Z")); // Wed 10:30 BST
+  assert.equal(status.isOpen, true);
+  assert.equal(status.kitchen, "kitchen until 16:00");
+});
+
+test("between the kitchen closing and the café closing the line says so", () => {
+  const status = getOpeningStatus(new Date("2026-09-16T15:30:00Z")); // Wed 16:30 BST
+  assert.equal(status.isOpen, true);
+  assert.equal(status.detail, "until 17:00 today");
+  assert.equal(status.kitchen, "kitchen closed for today");
+});
+
+test("the exact minute the kitchen closes counts as closed", () => {
+  assert.equal(
+    getOpeningStatus(new Date("2026-09-16T14:59:00Z")).kitchen, // Wed 15:59 BST
+    "kitchen until 16:00",
+  );
+  assert.equal(
+    getOpeningStatus(new Date("2026-09-16T15:00:00Z")).kitchen, // Wed 16:00 BST
+    "kitchen closed for today",
+  );
+});
+
+test("when the café is closed there is no kitchen line", () => {
+  assert.equal(getOpeningStatus(new Date("2026-09-16T17:30:00Z")).kitchen, undefined);
+});
+
+test("on Sunday the kitchen and the café close together, so nothing extra is said", () => {
+  const status = getOpeningStatus(new Date("2026-09-20T11:00:00Z")); // Sun 12:00 BST
+  assert.equal(status.isOpen, true);
+  assert.equal(status.detail, "until 16:00 today");
+  assert.equal(status.kitchen, undefined);
+});
+
 test("British Summer Time is applied, not a fixed offset", () => {
   // 16:30 UTC is 17:30 in London during BST, so the cafe has shut. Reading the clock
   // as UTC would wrongly report it as open with half an hour left.
