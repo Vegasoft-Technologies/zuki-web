@@ -1,6 +1,6 @@
 # 0007 — Booking architecture
 
-**Status:** accepted, 2026-09-20 (amended: instant confirmation is the requirement)
+**Status:** accepted, 2026-09-20 (amended 2026-09-20: instant confirmation is the requirement; amended 2026-09-21: the store is D1)
 
 ## Context
 
@@ -38,6 +38,16 @@ The interface exists so that the storage engine is a plug-in. Two implementation
 A read followed by a write is explicitly not acceptable for the capacity check; the
 in-memory store serialises reservations per slot, and the Postgres store will do it with
 a transaction at `SERIALIZABLE` or an advisory lock keyed on the slot.
+
+**Amendment, 2026-09-21.** Hosting is settled on Cloudflare (`0005`), and the store is
+**Cloudflare D1**, not Postgres: it is on the same account, has a free tier, and needs no
+second vendor or driver. D1 has no interactive transactions, so the capacity check is not
+a transaction but a single guarded statement: an `INSERT … SELECT … WHERE` whose `SELECT`
+produces a row only while the party still fits within the overlapping covers. SQLite
+executes one statement atomically under the database's single write lock, so two
+requests for the last covers cannot both see room. The schema is versioned as SQL files
+in `migrations/`. The Postgres paragraphs above are kept as the record of what was
+planned before the host was known.
 
 ### How the café is notified
 

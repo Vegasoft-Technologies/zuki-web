@@ -32,18 +32,23 @@ npm run dev
 
 The development server runs at <http://localhost:3000>.
 
+Bookings are stored in a Cloudflare D1 database, simulated locally by `npm run dev`. Run
+`npm run db:migrate:local` once, and again whenever a file is added to `migrations/`, so
+the local database has the schema.
+
 ## Commands
 
-| Command                | Purpose                                                                                       |
-| ---------------------- | --------------------------------------------------------------------------------------------- |
-| `npm run dev`          | Start the development server.                                                                 |
-| `npm run build`        | Produce a production build.                                                                   |
-| `npm run start`        | Serve a production build.                                                                     |
-| `npm run lint`         | Run ESLint.                                                                                   |
-| `npm run format`       | Format the project with Prettier.                                                             |
-| `npm run format:check` | Check formatting without writing changes.                                                     |
-| `npx tsc --noEmit`     | Type-check. See the order below.                                                              |
-| `npm run preview`      | Build the Cloudflare Worker and run it locally, with the cache, queue and database simulated. |
+| Command                    | Purpose                                                                                       |
+| -------------------------- | --------------------------------------------------------------------------------------------- |
+| `npm run dev`              | Start the development server.                                                                 |
+| `npm run build`            | Produce a production build.                                                                   |
+| `npm run start`            | Serve a production build.                                                                     |
+| `npm run lint`             | Run ESLint.                                                                                   |
+| `npm run format`           | Format the project with Prettier.                                                             |
+| `npm run format:check`     | Check formatting without writing changes.                                                     |
+| `npx tsc --noEmit`         | Type-check. See the order below.                                                              |
+| `npm run preview`          | Build the Cloudflare Worker and run it locally, with the cache, queue and database simulated. |
+| `npm run db:migrate:local` | Apply the SQL files in `migrations/` to the local database.                                   |
 
 ## Verification
 
