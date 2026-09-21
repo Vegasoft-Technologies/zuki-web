@@ -257,3 +257,64 @@ environment. The first measurement after deployment belongs in this table with i
 The on-page changes were: the title and meta description, one word in the story heading,
 the menu heading, one phrase in the visit hint, and one image description. No hidden
 text, no repeated phrases, no second `<h1>`; the hero and visit headings are unchanged.
+
+## 2026-09-21 — Image delivery switched on
+
+`images.unoptimized` is off. Every `next/image` now goes through a loader that asks for
+one of the generated widths (128, 256, 384, 512 or 768 px), and the `/img` route serves
+that width in AVIF, WebP or the original format according to the browser's `Accept`
+header. Measured on a production build served locally (`next start`), the page scrolled
+end to end so every lazily loaded image arrived. **These are local figures; the same
+measurement is to be repeated on the deployed address and recorded beneath.**
+
+The 642,795-byte `logo.png` that the page also requests as its `apple-touch-icon` and
+fallback favicon is excluded from every row below: it is not a `next/image`, it is
+unchanged by this work, and it is noted separately at the end.
+
+| Browser and screen            | Before       | After       | Reduction | Widths served     |
+| ----------------------------- | ------------ | ----------- | --------- | ----------------- |
+| Accepts AVIF, 375 px, 1x      | 11,318,031 B | 332,876 B   | 97.1%     | 256 (25), 128 (1) |
+| Accepts AVIF, 375 px, 2x      | 11,318,031 B | 639,695 B   | 94.3%     | 384 (25), 128 (1) |
+| Accepts AVIF, 1280 px, 1x     | 11,318,031 B | 332,876 B   | 97.1%     | 256 (25), 128 (1) |
+| Accepts AVIF, 1280 px, 2x     | 11,318,031 B | 1,002,689 B | 91.1%     | 512 (25), 128 (1) |
+| Accepts WebP only, 375 px, 2x | 11,318,031 B | 968,602 B   | 91.4%     | 384, 256, 128     |
+| Accepts neither, 375 px, 2x   | 11,318,031 B | 1,032,089 B | 90.9%     | 384, 256, 128     |
+
+Before, the 25 images were the same 25 files at every width and density: 24 JPEGs and
+the logo PNG at their full size, 11.3 MB. The `sizes` attributes were already in place
+but had no effect without a `srcset`.
+
+Format actually served, checked on the route directly with three `Accept` headers for
+the same 384-pixel gallery tile:
+
+| `Accept`                    | Response                   |
+| --------------------------- | -------------------------- |
+| `image/avif,image/webp,*/*` | `200 image/avif`, 22,233 B |
+| `image/webp,*/*`            | `200 image/webp`, 33,618 B |
+| `image/jpeg,*/*`            | `200 image/jpeg`, 35,664 B |
+
+Every response carries `Vary: Accept` and `Cache-Control: public, max-age=31536000,
+immutable`; the address carries the file's content hash, so a changed file gets a new
+address. A width larger than a source (the 300-pixel Vegasoft mark at 768) falls back to
+the original-size file in the negotiated format. A name that is not one of ours, or a
+width that is not generated, is a `404`.
+
+Cumulative layout shift, measured as on 2026-09-20:
+
+| Width   | Before | After |
+| ------- | ------ | ----- |
+| 375 px  | 0      | 0     |
+| 768 px  | 0      | 0     |
+| 1280 px | 0      | 0     |
+
+### Generated files
+
+`npm run images:formats` now also writes the resized copies: 351 new files, 16.1 MB,
+beside the 48 full-size AVIF and WebP files from 2026-09-20. It skips anything already
+current, so a rerun after adding one photograph writes only that photograph's copies.
+
+### Noted, not changed here
+
+The page links `/images/logo.png` (642,795 B) as its fallback icon and Apple touch icon,
+so browsers that fetch those still download the full-size PNG once per visit. It is the
+largest single image request left on the page and is a separate change.

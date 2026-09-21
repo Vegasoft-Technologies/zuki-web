@@ -17,11 +17,15 @@ const nextConfig: NextConfig = {
     },
   },
 
-  // Image optimisation stays off for now so that image handling does not block the
-  // migration. Components still use next/image, so intrinsic width and height are
-  // always emitted and no layout shift is introduced.
+  // Workers has no Node runtime, so Next's own image optimiser is unavailable. The
+  // loader maps each request to a file generated ahead of time (npm run images:formats)
+  // and the /img route picks AVIF, WebP or the original from what the browser accepts.
+  // The candidate widths are exactly the generated ones (src/lib/imageVariants.ts).
   images: {
-    unoptimized: true,
+    loader: "custom",
+    loaderFile: "./src/lib/imageLoader.ts",
+    imageSizes: [128, 256],
+    deviceSizes: [384, 512, 768],
   },
 
   // The production host serves this redirect as a hosting rule. Keeping it in the
