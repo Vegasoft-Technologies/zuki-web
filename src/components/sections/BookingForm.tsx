@@ -376,7 +376,17 @@ export default function BookingForm({
 
       <div className="booking__field">
         <label htmlFor="booking-note">Anything we should know? (optional)</label>
-        <textarea id="booking-note" name="note" rows={2} maxLength={300} />
+        <textarea
+          id="booking-note"
+          name="note"
+          rows={2}
+          maxLength={300}
+          aria-describedby="booking-note-hint"
+        />
+        <p className="booking__hint" id="booking-note-hint">
+          Allergies, a pushchair, a birthday — we use this only to get ready for your
+          visit; only the café sees it, and it is deleted with your booking.
+        </p>
       </div>
 
       {/* Real visitors never see this field. Anything that fills it is not a person. */}
