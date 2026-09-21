@@ -1,0 +1,43 @@
+name: Verify deployment
+
+# Runs the deployed-site checks from a runner and publishes the output as an artifact.
+# Manual only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: The deployed address to check
+        required: true
+        default: https://zuki-web.vegasoft.workers.dev
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # The browser and its driver are needed only here, so they are not a dependency of the site.
+      - run: npm i --no-save --no-audit --no-fund playwright && npx playwright install --with-deps chromium
+      - name: Checks with curl
+        run: mkdir -p results && bash scripts/verify/curl.sh "${{ inputs.url }}" | tee results/curl.txt
+      - name: Checks in a browser
+        env:
+          PLACES_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+        run: node scripts/verify/browser.mjs "${{ inputs.url }}" | tee results/browser.json
+      - name: Booking checks
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: bash scripts/verify/booking.sh "${{ inputs.url }}" | tee results/booking.txt
+      - name: Rich Results test
+        continue-on-error: true
+        run: node scripts/verify/rich-results.mjs "${{ inputs.url }}/" | tee results/rich-results.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results
+          path: results
