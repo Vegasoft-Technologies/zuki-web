@@ -1117,3 +1117,8 @@ a:focus-visible, button:focus-visible, .menu__tab:focus-visible {
 /* Fractional stars: each star is an inline SVG sized to the glyph it replaced, so the
    badge keeps its footprint. The fill is set on the polygon, in proportion to the score. */
 .rating-badge__star { display: inline-block; width: 1em; height: 1em; vertical-align: -0.1em; }
+
+/* Kitchen cut-off under each day's hours. Added with the kitchen-hours change. */
+.hours__kitchen { display: block; font-size: 0.8em; font-weight: 400; color: var(--ink-soft); }
+.hours tr.is-today .hours__kitchen { color: var(--teal-700); }
+.hero__status-kitchen { white-space: nowrap; }

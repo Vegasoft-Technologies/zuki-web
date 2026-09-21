@@ -26,6 +26,14 @@ export default function OpeningStatus() {
             {status.isOpen ? "Open now" : "Closed now"}
           </span>{" "}
           <span className="dot">·</span> {status.detail}
+          {status.kitchen ? (
+            <>
+              {" "}
+              <span className="hero__status-kitchen">
+                <span className="dot">·</span> {status.kitchen}
+              </span>
+            </>
+          ) : null}
         </>
       ) : null}
     </p>
