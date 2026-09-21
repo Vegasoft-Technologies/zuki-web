@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { fetchRating, parseRating } from "./rating.ts";
+import { fetchRating, parseRating, starFills } from "./rating.ts";
 
 const when = new Date("2026-09-20T10:00:00Z");
 
@@ -35,6 +35,15 @@ test("out-of-range or non-integer values are rejected", () => {
   assert.equal(parseRating({ rating: 7, userRatingCount: 1 }, "a", when), null);
   assert.equal(parseRating({ rating: 4, userRatingCount: 1.5 }, "a", when), null);
   assert.equal(parseRating({ rating: "4.3", userRatingCount: 1 }, "a", when), null);
+});
+
+test("each star is filled in proportion to the rating, never rounded up", () => {
+  assert.deepEqual(starFills(4.6), [1, 1, 1, 1, 0.6]);
+  assert.deepEqual(starFills(3.0), [1, 1, 1, 0, 0]);
+  assert.deepEqual(starFills(4.5), [1, 1, 1, 1, 0.5]);
+  assert.deepEqual(starFills(5.0), [1, 1, 1, 1, 1]);
+  assert.deepEqual(starFills(0), [0, 0, 0, 0, 0]);
+  assert.deepEqual(starFills(2.25), [1, 1, 0.25, 0, 0]);
 });
 
 test("without a key and a place identifier nothing is fetched and the answer is null", async () => {

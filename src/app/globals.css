@@ -1113,3 +1113,7 @@ a:focus-visible, button:focus-visible, .menu__tab:focus-visible {
 .rating-badge__stars { display: inline-flex; gap: 0.05em; margin-right: 0.35em; font-size: 0.85em; line-height: 1; }
 .rating-badge__star { color: var(--line); }
 .rating-badge__star.is-filled { color: var(--gold); }
+
+/* Fractional stars: each star is an inline SVG sized to the glyph it replaced, so the
+   badge keeps its footprint. The fill is set on the polygon, in proportion to the score. */
+.rating-badge__star { display: inline-block; width: 1em; height: 1em; vertical-align: -0.1em; }
