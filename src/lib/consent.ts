@@ -61,3 +61,15 @@ export function recordConsent(choice: Consent): void {
   hasRead = true;
   listeners.forEach((listener) => listener());
 }
+
+/** Forgets the choice, so the banner is shown again and nothing optional loads. */
+export function clearConsent(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Nothing was stored, or storage is unavailable; either way there is no choice left.
+  }
+  cached = "none";
+  hasRead = true;
+  listeners.forEach((listener) => listener());
+}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { site } from "@/data/site";
+import ConsentReset from "@/components/ui/ConsentReset";
 
 export const metadata: Metadata = {
   title: "Privacy & Cookie Policy — Zuki's Caffetteria",
@@ -16,7 +17,7 @@ export default function PrivacyPage() {
         ← Back to Zuki&apos;s
       </Link>
       <h1>Privacy &amp; Cookie Policy</h1>
-      <p className="legal__updated">Last updated: 20 September 2026</p>
+      <p className="legal__updated">Last updated: 21 September 2026</p>
 
       <p>
         This policy explains how <strong>Zuki&apos;s Caffetteria</strong> (&quot;we&quot;,
@@ -94,14 +95,37 @@ export default function PrivacyPage() {
           you choose &quot;Essential only&quot;, the map stays off.
         </li>
         <li>
+          <strong>Microsoft Clarity</strong> — only if you choose &quot;Accept all&quot;,
+          we use Microsoft Clarity to understand how the site is used: which parts of a
+          page are read, where people tap, and replays of how a visit went. It sets
+          cookies (<code>_clck</code> and <code>_clsk</code>) to tell one visit from the
+          next. It never loads before you choose, and never if you choose &quot;Essential
+          only&quot;. Everything you type into the booking form is masked before it leaves
+          your browser, so your name, telephone number, email address and note are never
+          recorded. The processor is Microsoft Ireland Operations Limited, under{" "}
+          <a
+            href="https://privacy.microsoft.com/privacystatement"
+            target="_blank"
+            rel="noopener"
+          >
+            Microsoft&apos;s privacy statement
+          </a>
+          .
+        </li>
+        <li>
           <strong>Typefaces</strong> — our fonts are served from this website itself. No
           request goes to a font provider and no cookies are set.
         </li>
       </ul>
+      <h3>Changing your mind</h3>
       <p>
-        You can change your mind any time by clearing this site&apos;s data in your
-        browser, which will bring the cookie banner back.
+        You can withdraw your choice at any time. This button forgets it, tells Microsoft
+        Clarity to delete its cookies, and brings the banner back so you can choose again:
       </p>
+      <p>
+        <ConsentReset />
+      </p>
+      <p>Clearing this site&apos;s data in your browser does the same.</p>
 
       <h2>Links to other sites</h2>
       <p>

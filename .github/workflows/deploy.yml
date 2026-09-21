@@ -59,6 +59,8 @@ jobs:
           GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
           GOOGLE_PLACE_ID: ChIJRxz9-QClbUgRigJpc1wN0pc
           BOOKING_CONFIRMATION: manual
+          # Public configuration, inlined at build time. Empty until the project exists.
+          NEXT_PUBLIC_CLARITY_PROJECT_ID: ${{ vars.CLARITY_PROJECT_ID }}
         run: npx opennextjs-cloudflare build
 
       - name: Deploy to the Worker

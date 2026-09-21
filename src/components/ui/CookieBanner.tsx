@@ -46,8 +46,8 @@ export default function CookieBanner() {
       <div className="cookie__inner">
         <p className="cookie__text">
           We use essential cookies to run this site, and — only if you allow — Google Maps
-          to show you where we are. See our <a href="/privacy">Privacy & Cookie Policy</a>
-          .
+          to show you where we are and Microsoft Clarity to see how the site is used. See
+          our <a href="/privacy">Privacy & Cookie Policy</a>.
         </p>
         <div className="cookie__actions">
           <button

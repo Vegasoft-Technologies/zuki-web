@@ -48,6 +48,25 @@ Key. A token can be revoked in one click; a password cannot be revoked without l
 everyone out. If the token is ever exposed, revoke it, issue a new one with the same
 scope, and replace the repository secret.
 
+## Microsoft Clarity
+
+Session analytics run on Microsoft Clarity, loaded only after a visitor chooses "Accept
+all" and with the booking form masked. The project must belong to a Microsoft account the
+business controls, not to anyone's personal account, for the same reason as the Cloudflare
+account: handing the site over must not mean handing over a personal login.
+
+| Item                  | Where                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------- |
+| Clarity project       | clarity.microsoft.com, under the Vegasoft Microsoft account                                 |
+| Project identifier    | Repository variable `CLARITY_PROJECT_ID` (public configuration, not a secret); `.env.local` |
+| Masking mode          | Strict, set in the project's Settings → Masking; the form is also masked in the markup      |
+| Project administrator | The repository owner. **Second administrator outstanding**, as for Cloudflare               |
+
+**Handover.** The Clarity project lives in the business's Microsoft account. When
+responsibility moves to Vegasoft, a colleague is added to the project as an
+administrator and the outgoing administrator is removed; the project identifier does not
+change and nothing is redeployed.
+
 ## Handover
 
 **Handover.** This project has its own Cloudflare account, separate from any personal
