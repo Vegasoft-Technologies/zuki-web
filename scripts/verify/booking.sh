@@ -30,6 +30,10 @@ validation)
   echo "inside notice (today $(TZ=Europe/London date +%H:%M) London, 08:00): $(post "$(body 'Val Two' 2 $(TZ=Europe/London date +%F) 08:00)" | head -1)"
   echo "beyond window:         $(post "$(body 'Val Three' 2 $(date -d '+40 days' +%F) 12:00)" | head -1)"
   echo "party of 7:            $(post "$(body 'Val Four' 7 $D1 12:00)" | head -1)"
+  # The capacity part, on another runner, fills $D2 14:00 to 10 covers; wait for it so
+  # this last post meets exactly two seats left.
+  for i in $(seq 1 48); do c=$(rows "select coalesce(sum(party_size),0) as c from bookings where date='$D2' and time='14:00'" | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["c"])'); [ "$c" -ge 10 ] && break; sleep 5; done
+  echo "covers at $D2 14:00 before the post: $c"
   echo "party of 3 with 2 left ($D2 14:00): $(post "$(body 'Test Three' 3 $D2 14:00)" | head -1)"
   ;;
 race)
