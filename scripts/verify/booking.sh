@@ -31,3 +31,6 @@ for i in 1 2 3 4 5 6 7 8; do post 198.51.100.99 "$(body '' 2 $D1 13:00)" | tail 
 curl -s -D - -o /dev/null -H "content-type: application/json" -H "x-forwarded-for: 198.51.100.99" -d "$(body 'Rate Test' 2 $D1 13:00)" "$B" | grep -iE "^HTTP|retry-after"
 echo "same request without the header (runner's own address): $(curl -s -o /dev/null -w '%{http_code}' -H 'content-type: application/json' -d "$(body 'Rate Test B' 2 $D1 13:30)" "$B")"
 echo; echo "rows now: $(rows 'select count(*) as n from bookings')"
+echo "== 6. removing the test bookings =="
+rows "delete from bookings where name like 'Test %' or name like 'Race %' or name like 'Val %' or name like 'Rate Test%'" >/dev/null
+echo "rows after clean-up: $(rows 'select count(*) as n from bookings')"

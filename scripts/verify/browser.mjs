@@ -83,15 +83,36 @@ const KEY = process.env.PLACES_KEY || "";
     }));
     // scroll for lazy images and CLS
     await page.evaluate(async () => {
-      for (let y = 0; y < document.body.scrollHeight; y += 500) {
+      for (let y = 0; y < document.body.scrollHeight; y += 400) {
         window.scrollTo(0, y);
-        await new Promise((r) => setTimeout(r, 100));
+        await new Promise((r) => setTimeout(r, 150));
       }
-      window.scrollTo(0, 0);
     });
-    await page.waitForTimeout(1500);
+    // Every image must have finished, or the byte count is of a page still loading.
+    await page
+      .waitForFunction(() => [...document.images].every((i) => i.complete), null, {
+        timeout: 30000,
+      })
+      .catch(() => {});
+    await page.waitForTimeout(2500);
+    await page.evaluate(() => window.scrollTo(0, 0));
     const cls = await page.evaluate(() => window.__cls);
     const images = responses.filter((r) => r.ct.startsWith("image/"));
+    const chosen = await page.evaluate(() => {
+      const w = {};
+      for (const i of document.images) {
+        const m = /-(\d+)\.(jpg|png)/.exec(i.currentSrc);
+        const k = m ? m[1] : "other";
+        w[k] = (w[k] || 0) + 1;
+      }
+      return w;
+    });
+    const complete = await page.evaluate(
+      () =>
+        [...document.images].filter((i) => i.complete).length +
+        "/" +
+        document.images.length,
+    );
     const byType = {};
     for (const r of images) byType[r.ct] = (byType[r.ct] || 0) + r.len;
     const cookies = (await ctx.cookies()).map((c) => c.name);
@@ -134,6 +155,8 @@ const KEY = process.env.PLACES_KEY || "";
         count: images.length,
         bytes: images.reduce((s, r) => s + r.len, 0),
         byType,
+        widthsChosen: chosen,
+        complete,
       },
       injectedScript: responses.some((r) => r.path.includes("/cdn-cgi/")),
       keyInAssets: KEY ? `${keyHits} of ${assetsChecked}` : "no key given",
