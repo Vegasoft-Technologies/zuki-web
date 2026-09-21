@@ -383,7 +383,7 @@ Test rows were written to the live database for these checks and deleted afterwa
 ### Item 8 — the checks that needed a public address
 
 - **Schema.org validator**, on the deployed page: rendered, 1 object, type `CafeOrCoffeeShop`, **0 errors, 0 warnings**.
-- **Google Rich Results test**: the tool now answers "Something went wrong — Log in and try again" to an unauthenticated run (screenshot in the workflow artifact). It needs a Google sign-in and is for the repository owner to run; the result goes here.
+- **Google Rich Results test**, run by the repository owner while signed in, on 2026-09-21 at 12:47:38: **2 valid items detected**, eligible for rich results — Local business, 1 valid item; Organisation, 1 valid item — page crawled successfully, 0 errors. An unauthenticated run from the workflow is refused with "Log in and try again", so this test stays a manual step.
 - **Load time and request count**, runner in Seattle, Cloudflare `SEA`, fresh browser, no cache:
 
   | Width   | Time to first byte | DOM content loaded | `load` event | Requests at `load` | Requests after scrolling the whole page |
