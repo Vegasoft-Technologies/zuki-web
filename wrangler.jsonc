@@ -1,0 +1,55 @@
+{
+  // Cloudflare Workers configuration. The Worker is built from the Next.js output by
+  // @opennextjs/cloudflare (see docs/decisions/0005-hosting.md). Nothing in this file is
+  // secret: the Places key is a Worker secret set outside the repository.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "zuki-web",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  // Plain configuration. Secrets are never listed here.
+  "vars": {
+    "GOOGLE_PLACE_ID": "ChIJRxz9-QClbUgRigJpc1wN0pc",
+    "BOOKING_CONFIRMATION": "manual",
+  },
+  // The incremental cache: prerendered pages and their fetched data, so that the rating's
+  // daily revalidation actually revalidates instead of being fixed at build time.
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "zuki-web-cache",
+    },
+  ],
+  // Time-based revalidation is queued through a Durable Object, which deduplicates
+  // concurrent revalidations of the same page. SQLite-backed, so it is on the free plan.
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "NEXT_CACHE_DO_QUEUE",
+        "class_name": "DOQueueHandler",
+      },
+    ],
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["DOQueueHandler"],
+    },
+  ],
+  // The revalidation queue calls the Worker back through this binding.
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "zuki-web",
+    },
+  ],
+  "observability": {
+    "enabled": true,
+  },
+  // Every uploaded version gets a preview address; the pull request workflow uses it.
+  "preview_urls": true,
+}

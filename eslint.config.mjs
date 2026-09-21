@@ -16,6 +16,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // The recovered production site is a verbatim record, not project source.
     "reference/**",
+    // Output of the Cloudflare adapter and of wrangler's local runtime.
+    ".open-next/**",
+    ".wrangler/**",
   ]),
 ]);
 

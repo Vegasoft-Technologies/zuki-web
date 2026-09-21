@@ -1,0 +1,79 @@
+name: Deploy
+
+# main deploys to the Worker; every pull request uploads a preview version and gets its
+# preview address in the job summary. Both need the two Cloudflare repository secrets;
+# until they exist the jobs stop early and say so rather than failing.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: ${{ github.event_name == 'push' && 'deploy' || 'preview' }}
+    runs-on: ubuntu-latest
+    # A pull request from a fork has no access to secrets, so it cannot upload a preview.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Check the deployment secrets exist
+        id: secrets
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$ACCOUNT" ]; then
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not set; nothing deployed." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Node.js
+        if: steps.secrets.outputs.present == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.secrets.outputs.present == 'true'
+        run: npm ci
+
+      # The build prerenders the home page, which fetches the rating once; the key is
+      # therefore needed at build time as well as in the Worker. It is read from a
+      # repository secret here and from a Worker secret at runtime, and is never written
+      # to a file.
+      - name: Build the Worker
+        if: steps.secrets.outputs.present == 'true'
+        env:
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+          GOOGLE_PLACE_ID: ChIJRxz9-QClbUgRigJpc1wN0pc
+          BOOKING_CONFIRMATION: manual
+        run: npx opennextjs-cloudflare build
+
+      - name: Deploy to the Worker
+        if: steps.secrets.outputs.present == 'true' && github.event_name == 'push'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx opennextjs-cloudflare deploy
+
+      - name: Upload a preview version
+        if: steps.secrets.outputs.present == 'true' && github.event_name == 'pull_request'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx opennextjs-cloudflare upload 2>&1 | tee upload.log
+          url=$(grep -o 'https://[a-z0-9-]*\.workers\.dev[^ ]*' upload.log | head -n 1)
+          echo "Preview: ${url:-address not found in the upload output}" >> "$GITHUB_STEP_SUMMARY"

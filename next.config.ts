@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const nextConfig: NextConfig = {
   // Next.js otherwise appends a block of its own guidance to local tooling
@@ -38,3 +39,10 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// In `next dev`, gives the application the same bindings it has on Cloudflare (the R2
+// cache, the queue, and later the database), simulated locally from wrangler.jsonc.
+// Guarded so that a production build does not start the local runtime as well.
+if (process.env.NODE_ENV === "development") {
+  initOpenNextCloudflareForDev();
+}

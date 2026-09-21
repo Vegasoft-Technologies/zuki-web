@@ -34,15 +34,16 @@ The development server runs at <http://localhost:3000>.
 
 ## Commands
 
-| Command                | Purpose                                   |
-| ---------------------- | ----------------------------------------- |
-| `npm run dev`          | Start the development server.             |
-| `npm run build`        | Produce a production build.               |
-| `npm run start`        | Serve a production build.                 |
-| `npm run lint`         | Run ESLint.                               |
-| `npm run format`       | Format the project with Prettier.         |
-| `npm run format:check` | Check formatting without writing changes. |
-| `npx tsc --noEmit`     | Type-check. See the order below.          |
+| Command                | Purpose                                                                                       |
+| ---------------------- | --------------------------------------------------------------------------------------------- |
+| `npm run dev`          | Start the development server.                                                                 |
+| `npm run build`        | Produce a production build.                                                                   |
+| `npm run start`        | Serve a production build.                                                                     |
+| `npm run lint`         | Run ESLint.                                                                                   |
+| `npm run format`       | Format the project with Prettier.                                                             |
+| `npm run format:check` | Check formatting without writing changes.                                                     |
+| `npx tsc --noEmit`     | Type-check. See the order below.                                                              |
+| `npm run preview`      | Build the Cloudflare Worker and run it locally, with the cache, queue and database simulated. |
 
 ## Verification
 
@@ -57,6 +58,24 @@ npx tsc --noEmit
 The order matters. `npx tsc --noEmit` needs the route types that `npm run build`
 generates, so on a clean checkout it fails if it is run first.
 
+## Deployment
+
+The site runs on Cloudflare Workers, built by `@opennextjs/cloudflare` from the Next.js
+output (`docs/decisions/0005-hosting.md`). The Worker is configured in `wrangler.jsonc`
+and the adapter in `open-next.config.ts`.
+
+Deployment is done by the `Deploy` workflow only: a push to `main` deploys the Worker,
+and every pull request uploads a preview version whose address appears in the job
+summary. The workflow needs the repository secrets `CLOUDFLARE_API_TOKEN`,
+`CLOUDFLARE_ACCOUNT_ID` and `GOOGLE_PLACES_API_KEY`; until they exist it stops early and
+says so. Who holds those credentials, and where they live, is recorded in
+`docs/access.md`.
+
+Do not deploy from a workstation. The adapter copies `.env.local` into the Worker
+bundle, following Next's environment-file rules, so a bundle built beside a real
+`.env.local` would carry the key inside the script. The workflow builds on a runner
+that has no such file, and the Worker reads the key from its own secret at run time.
+
 ## Documentation
 
 | Document                                                           | What it covers                                                              |
@@ -66,6 +85,7 @@ generates, so on a clean checkout it fails if it is run first.
 | [`docs/architecture.md`](docs/architecture.md)                     | The folder tree, how a request renders, which components run in the browser |
 | [`docs/content-guide.md`](docs/content-guide.md)                   | Editing the menu, hours and gallery without being a developer               |
 | [`docs/baseline.md`](docs/baseline.md)                             | Measurements, with the date each was taken                                  |
+| [`docs/access.md`](docs/access.md)                                 | Which account the site runs in, who holds access, where credentials live    |
 | [`docs/decisions/`](docs/decisions/)                               | Why the significant choices were made                                       |
 
 ## Performance budget
