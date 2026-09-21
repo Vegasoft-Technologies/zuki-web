@@ -35,7 +35,7 @@ export interface GalleryImage {
 export const gallery: GalleryImage[] = [
   {
     src: imgInterior,
-    alt: "The flower-covered interior of Zuki's Caffetteria",
+    alt: "The flower-covered interior of Zuki's Caffetteria, a café on Queen Street, Exeter",
     caption: "Our flowered room",
     variant: "tall",
   },

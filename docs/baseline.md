@@ -240,3 +240,20 @@ later figure is compared with a dated one rather than with memory.
   key (checked: 0 occurrences after a clean build), but an earlier draft that put the key
   in the query string did leave it there, because the cache is keyed on the URL. Keep the
   key in a header and `.next` ignored, as both are now.
+
+## 2026-09-21 — Search positions before the keyword plan
+
+The client's analysis of 2026-09-18 reports the site's position for the two local search
+terms it asks the page to target. These are the starting figures; the effect of the
+keyword changes applied on 2026-09-21 is measured against them, not against memory.
+
+| Term                       | Position, as reported 2026-09-18 |
+| -------------------------- | -------------------------------- |
+| "cafe Exeter Queen Street" | tenth                            |
+| "breakfast Exeter"         | eleventh                         |
+
+The positions were reported by the client and could not be re-measured from this
+environment. The first measurement after deployment belongs in this table with its date.
+The on-page changes were: the title and meta description, one word in the story heading,
+the menu heading, one phrase in the visit hint, and one image description. No hidden
+text, no repeated phrases, no second `<h1>`; the hero and visit headings are unchanged.

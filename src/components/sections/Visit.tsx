@@ -22,8 +22,8 @@ export default function Visit() {
             <h3>Where</h3>
             <CopyAddress />
             <p className="visit__hint">
-              Right next to Exeter Central Station — perfect for a coffee before your
-              train.
+              Right next to Exeter Central Station — perfect for breakfast or a coffee
+              before your train.
             </p>
             <a
               className="link-arrow"

@@ -11,7 +11,9 @@ export default function MenuSection() {
     <section className="menu" id="menu">
       <Reveal className="menu__head">
         <Eyebrow className="eyebrow--center">{"What's cooking"}</Eyebrow>
-        <SectionTitle className="section-title--center">The menu</SectionTitle>
+        <SectionTitle className="section-title--center">
+          The menu — breakfast, brunch and more
+        </SectionTitle>
         <p className="menu__note">
           Full menu served all day till {kitchenCutoffNote}. Add a Mimosa to your brunch
           for £5.95.
