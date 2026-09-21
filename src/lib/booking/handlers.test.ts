@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { bookingRules } from "./config.ts";
+import { bookingCopy, bookingRules } from "./config.ts";
 import { createBookingHandlers, forwardedAddress } from "./handlers.ts";
 import { RecordingNotifier } from "./notifier.ts";
+import { renderNotice } from "./resendNotifier.ts";
 import { MemoryRateLimiter } from "./rateLimit.ts";
 import { InMemoryBookingStore } from "./store.ts";
 
@@ -225,4 +226,55 @@ test("with the edge's address the request goes through, whatever a forwarding he
     post(good, { "cf-connecting-ip": "203.0.113.50", "x-forwarded-for": "198.51.100.1" }),
   );
   assert.equal(res.status, 201);
+});
+
+// Instant confirmation: a table that is stored is confirmed, and nothing else may say so.
+const CONFIRMED_WORDS = /confirmed|is held|Your table|booked/i;
+
+test("a stored booking always answers with the confirmed wording, and the notice says confirmed", async () => {
+  const notifier = new RecordingNotifier();
+  const { handlers } = setup({ notifier });
+  for (const variant of [
+    good,
+    { ...good, area: "outside" },
+    { ...good, partySize: "6", time: "15:00" },
+  ]) {
+    const res = await handlers.POST(post(variant));
+    assert.equal(res.status, 201);
+    const body = await res.json();
+    assert.equal(body.booking.status, "confirmed");
+    assert.equal(body.copy.beforeSubmit, bookingCopy.instant.beforeSubmit);
+    assert.equal(body.copy.submitLabel, "Book a table");
+    assert.equal(body.copy.successHeading, "Your table is held");
+    assert.match(body.copy.successBody, /Your table is booked/);
+  }
+  assert.equal(notifier.received.length, 3);
+  for (const booking of notifier.received) {
+    const notice = renderNotice(booking, "instant");
+    assert.match(notice.subject, /^Table booked: .* — confirmed$/);
+    assert.match(notice.text.split("\n")[0], /^This table is CONFIRMED/);
+  }
+});
+
+test("a booking rejected for capacity, notice, window, party size, a closed kitchen or a missing area never carries the confirmed wording", async () => {
+  const notifier = new RecordingNotifier();
+  const { store, handlers } = setup({ notifier });
+  for (let i = 0; i < 11; i++) await handlers.POST(post(good)); // inside full at 12:00
+  const rejected = [
+    ["capacity", good],
+    ["notice", { ...good, date: "2026-09-21", time: "09:00" }],
+    ["window", { ...good, date: "2026-09-29" }],
+    ["party size", { ...good, partySize: "7" }],
+    ["closed kitchen", { ...good, time: "16:00" }],
+    ["no area", { ...good, area: "" }],
+  ] as const;
+  const stored = (await store.list(good.date)).length;
+  for (const [reason, payload] of rejected) {
+    const res = await handlers.POST(post(payload));
+    assert.ok(res.status === 400 || res.status === 409, `${reason}: ${res.status}`);
+    const text = await res.text();
+    assert.doesNotMatch(text, CONFIRMED_WORDS, reason);
+  }
+  assert.equal((await store.list(good.date)).length, stored);
+  assert.equal(notifier.received.length, 11);
 });
