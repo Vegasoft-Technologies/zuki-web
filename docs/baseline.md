@@ -340,3 +340,75 @@ Chrome had been choosing the PNG over the SVG when the PNG carried no `sizes`; w
 small PNGs offered it takes the SVG alone. Safari fetched the logo twice, once for each
 link that pointed at it. Neither browser fetched the touch icon on an ordinary page load
 in this test; it is 5,084 B when it is fetched.
+
+## 2026-09-21 — First deployment: https://zuki-web.vegasoft.workers.dev
+
+The site is deployed to Cloudflare Workers in the Vegasoft account, at the address above,
+by the Deploy workflow from `main` (Worker version `5de0c575…`). The custom domain is not
+yet connected (`docs/decisions/0005-hosting.md`). Every figure in this section was measured
+**from a GitHub Actions runner** by the `Verify deployment` workflow, because `workers.dev`
+is not reachable from the workstation used today. The runner reached Cloudflare's Seattle
+location, so the timings are transatlantic; a visitor in Exeter is served from a closer
+location and should see less.
+
+### Item 2 — the deployment
+
+| Check                         | Result                                                                                                                                                                 |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Home page                     | `200`, 185,534 B of HTML in 0.61 s from the runner; `server: cloudflare`, `x-opennext: 1`                                                                              |
+| Sections at 375, 768, 1280    | all eight present; no horizontal scroll at any width                                                                                                                   |
+| Rating badge                  | `Rated 4.6 out of 5 from 281 reviews on Google, updated 21 Sept 2026. Read the reviews.`                                                                               |
+| `/privacy.html`               | `308` → `/privacy`; `/privacy` `200`; `/privacy/` `308` → `/privacy`                                                                                                   |
+| `/sitemap.xml`, `/robots.txt` | `200 application/xml`, `200 text/plain`, both naming `zukiscaffetteria.co.uk`                                                                                          |
+| Cookie banner                 | shown on a first visit at all three widths                                                                                                                             |
+| Requests before consent       | one host only, the site itself; 0 cookies; 0 iframes                                                                                                                   |
+| Console                       | 0 errors, 0 warnings, 0 page errors, at all three widths                                                                                                               |
+| Places key in served assets   | the two pages and every script and stylesheet they reference: 0 of 11 contain it                                                                                       |
+| Incremental cache             | first and second request both `x-nextjs-cache: HIT`, `cache-control: s-maxage=86377, stale-while-revalidate=2592000`; the deploy populated 6 objects into the KV cache |
+| Static build output           | `cf-cache-status: HIT`, `cache-control: public,max-age=31536000,immutable`                                                                                             |
+| Injected bot-detection script | **absent** on this address (0 `cdn-cgi/challenge-platform` tags). It is a zone setting, so it may return when the custom domain in the other account is connected      |
+
+### Item 4 — bookings against the live database
+
+Test rows were written to the live database for these checks and deleted afterwards
+(0 rows before, 0 after).
+
+1. `POST` → `201`, `bk-mub1mskc-1nl1kd`; the row is in D1; availability for the slot shows `remaining: 10`. The Worker was redeployed between the local runs and this one and the database is separate from the Worker, so a redeploy cannot lose a booking.
+2. 12 of 12 covers → `409 That time has just filled up — please choose another.`, `remaining: 0`; 2 seats left, party of 3 → `409 Only 2 seats are left at that time…`, `remaining: 2`.
+3. 11 of 12 booked, two simultaneous requests for the last cover: `409` and `201`; the database holds 3 rows, 12 covers.
+4. Outside hours → `time`; inside the minimum notice → `time`; beyond the window → `date`; party of 7 → `partySize`; each alone.
+5. **The rate limit did not trigger**: eight invalid posts from one address were all `400`. The limiter is per isolate in memory and reads `x-forwarded-for` first; see issue #66. Locally the same sequence gives `429`.
+6. The suite passes unchanged (76 tests).
+
+### Item 8 — the checks that needed a public address
+
+- **Schema.org validator**, on the deployed page: rendered, 1 object, type `CafeOrCoffeeShop`, **0 errors, 0 warnings**.
+- **Google Rich Results test**: the tool now answers "Something went wrong — Log in and try again" to an unauthenticated run (screenshot in the workflow artifact). It needs a Google sign-in and is for the repository owner to run; the result goes here.
+- **Load time and request count**, runner in Seattle, Cloudflare `SEA`, fresh browser, no cache:
+
+  | Width   | Time to first byte | DOM content loaded | `load` event | Requests at `load` | Requests after scrolling the whole page |
+  | ------- | ------------------ | ------------------ | ------------ | ------------------ | --------------------------------------- |
+  | 375 px  | 90 ms              | 187 ms             | 586 ms       | 18                 | 19                                      |
+  | 1280 px | 66 ms              | 124 ms             | 567 ms       | 18                 | 35                                      |
+
+  Against the client's original 0.532 s download, 0.198 s page load and 19 requests: the requirement of under two seconds is met with room; the request count at `load` matches the original 19 within one, and grows only as the visitor scrolls and lazily loaded photographs arrive. These are measured behind Cloudflare; the injected script that `docs/baseline.md` warns about was not present on this address, so nothing needed subtracting.
+
+- **Canonical URL.** The Worker serves the root at `/`. The canonical Next emits is `https://zukiscaffetteria.co.uk` without the slash, and it strips the slash even when the value is given as a URL object with one; the original site's canonical was `https://zukiscaffetteria.co.uk/`, and the sitemap and the structured data still say `/`. The two forms are the same resource: an empty path and `/` are equivalent for the root under RFC 3986 §6.2.3, and search engines normalise them identically. Neither end is wrong, so neither was changed; for `/privacy` the canonical, the served path and the sitemap agree exactly.
+
+### Item 3 — image delivery, measured on the deployed site
+
+Fresh browser on the runner, the page scrolled end to end and every image waited for
+(26 of 26 complete), 375 px at 2x, 768 and 1280 px at 1x. The local figures of the same
+day are alongside; they agree to within the size of one photograph's variant.
+
+| Screen      | Deployed bytes | Local bytes | Format served | Widths chosen              | Layout shift |
+| ----------- | -------------- | ----------- | ------------- | -------------------------- | ------------ |
+| 375 px, 2x  | 644,175 B      | 639,695 B   | AVIF          | 384 (23), 256 (1), 128 (2) | 0            |
+| 768 px, 1x  | 332,876 B      | 332,876 B   | AVIF          | 256 (23), 128 (3)          | 0            |
+| 1280 px, 1x | 332,876 B      | 332,876 B   | AVIF          | 256 (23), 128 (3)          | 0            |
+
+Before this work the same page sent 11,318,031 B of images at every width. The image route
+on the deployed Worker answers the same 384 px tile as `image/avif` 22,233 B, `image/webp`
+33,618 B or `image/jpeg` 35,664 B according to `Accept`, with `Vary: Accept` and a year's
+immutable caching. Whole-page totals after scrolling, including HTML, script, fonts and
+images: 1,646,938 B at 375 px (43 requests), 1,335,639 B at 768 and 1280 px (42 requests).

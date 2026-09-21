@@ -16,13 +16,13 @@ database — lives in that account and nowhere else.
 The account holds only this project. Granting a colleague administrator rights on it
 grants them nothing else.
 
-| Resource                        | Where                                                                       |
-| ------------------------------- | --------------------------------------------------------------------------- |
-| Worker `zuki-web`               | Vegasoft account, Workers & Pages                                           |
-| KV namespace `zuki-web-cache`   | Vegasoft account, Workers KV (the incremental cache; safe to empty)         |
-| Durable Object `DOQueueHandler` | Vegasoft account, bound to the Worker (revalidation queue)                  |
-| D1 database                     | Vegasoft account, D1 (bookings; holds personal data)                        |
-| Domain `zukiscaffetteria.co.uk` | A different Cloudflare account today — see `docs/decisions/0005-hosting.md` |
+| Resource                        | Where                                                                                                              |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Worker `zuki-web`               | Vegasoft account, Workers & Pages; served at `https://zuki-web.vegasoft.workers.dev` until the domain is connected |
+| KV namespace `zuki-web-cache`   | Vegasoft account, Workers KV (the incremental cache; safe to empty)                                                |
+| Durable Object `DOQueueHandler` | Vegasoft account, bound to the Worker (revalidation queue)                                                         |
+| D1 database                     | Vegasoft account, D1 (bookings; holds personal data)                                                               |
+| Domain `zukiscaffetteria.co.uk` | A different Cloudflare account today — see `docs/decisions/0005-hosting.md`                                        |
 
 ## Who holds access
 
