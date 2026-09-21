@@ -1,7 +1,9 @@
 {
   // Cloudflare Workers configuration. The Worker is built from the Next.js output by
   // @opennextjs/cloudflare (see docs/decisions/0005-hosting.md). Nothing in this file is
-  // secret: the Places key is a Worker secret set outside the repository.
+  // secret: keys and addresses are Worker secrets set outside the repository. The account
+  // the Worker deploys to is given by the deployment token and CLOUDFLARE_ACCOUNT_ID; the
+  // database and namespace below belong to the account that also holds the domain.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "zuki-web",
   "main": ".open-next/worker.js",
@@ -22,7 +24,7 @@
   "kv_namespaces": [
     {
       "binding": "NEXT_INC_CACHE_KV",
-      "id": "34e2564563f2499d9dfcbaddead210c2",
+      "id": "f060496fbdf5499d924dfbc513c6340f",
     },
   ],
   // Bookings. The database is created once in the account (docs/access.md); its identifier
@@ -32,7 +34,7 @@
     {
       "binding": "DB",
       "database_name": "zuki-web-bookings",
-      "database_id": "42f937b7-8fb9-42b6-acd4-01f81160267c",
+      "database_id": "80efaa86-9607-4b16-b0e6-c2286fc757f5",
       "migrations_dir": "migrations",
     },
   ],
