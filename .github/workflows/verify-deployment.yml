@@ -12,7 +12,7 @@ on:
         default: https://zuki-web.vegasoft.workers.dev
 
 jobs:
-  verify:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,15 +29,56 @@ jobs:
         env:
           PLACES_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
         run: node scripts/verify/browser.mjs "${{ inputs.url }}" | tee results/browser.json
-      - name: Booking checks
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: bash scripts/verify/booking.sh "${{ inputs.url }}" | tee results/booking.txt
       - name: Rich Results test
         continue-on-error: true
         run: node scripts/verify/rich-results.mjs "${{ inputs.url }}/" | tee results/rich-results.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: results
+          name: results-checks
+          path: results
+
+  # The booking checks post to the live endpoint, which allows five posts per address per
+  # ten minutes, so each part runs on its own runner and therefore from its own address.
+  booking:
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [persist, capacity, validation, race, limit, second-address]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Booking checks (${{ matrix.part }})
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: mkdir -p results && bash scripts/verify/booking.sh "${{ inputs.url }}" "${{ matrix.part }}" | tee "results/booking-${{ matrix.part }}.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-booking-${{ matrix.part }}
+          path: results
+
+  cleanup:
+    needs: booking
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Remove the test rows
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: mkdir -p results && bash scripts/verify/booking.sh "${{ inputs.url }}" cleanup | tee results/booking-cleanup.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-cleanup
           path: results

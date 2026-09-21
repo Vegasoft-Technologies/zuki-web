@@ -5,7 +5,7 @@ import { after, before, beforeEach, test } from "node:test";
 import { getPlatformProxy } from "wrangler";
 import { provisionalRules } from "./config.ts";
 import { D1BookingStore, type D1Like } from "./d1Store.ts";
-import { createBookingHandlers } from "./handlers.ts";
+import { createBookingHandlers, forwardedAddress } from "./handlers.ts";
 import { RecordingNotifier } from "./notifier.ts";
 import { MemoryRateLimiter } from "./rateLimit.ts";
 import { checkSlot } from "./slots.ts";
@@ -146,6 +146,7 @@ test("the handlers run unchanged against the D1 store", async () => {
     mode: "instant",
     maxBodyBytes: 8 * 1024,
     now: () => NOW,
+    clientAddress: forwardedAddress,
   });
   const post = (body: Record<string, string>) =>
     handlers.POST(
