@@ -11,5 +11,6 @@ echo "== sitemap and robots =="; curl -s -o /dev/null -w "sitemap %{http_code} %
 echo "== image route by Accept =="; for a in "image/avif,image/webp,*/*" "image/webp,*/*" "image/jpeg,*/*"; do curl -s -o /dev/null -w "Accept: $a -> %{http_code} %{content_type} %{size_download} B\n" -H "Accept: $a" "$U/img/gallery-04-384.jpg?v=x"; done
 curl -sI -H "Accept: image/avif" "$U/img/gallery-04-384.jpg" | grep -iE "^(cache-control|vary|cf-cache-status)"
 echo "== static chunk caching =="; f=$(grep -o '/_next/static/chunks/[A-Za-z0-9_.-]*\.js' $W/home.html | head -1); curl -sI "$U$f" | grep -iE "^(HTTP|cache-control|cf-cache-status)"
-echo "== availability api =="; curl -s -o /dev/null -w "%{http_code}\n" "$U/api/bookings?date=$(date -d '+3 days' +%F)"
+echo "== availability api (read-only) =="; curl -s -o /dev/null -w "%{http_code}\n" "$U/api/bookings?date=$(date -d '+3 days' +%F)"
+echo "tomorrow, per area: $(curl -s "$U/api/bookings?date=$(date -d '+1 day' +%F)" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["date"], [(s["time"], s["remaining"]) for s in d["slots"]])')"
 echo "== schema.org validator =="; curl -s -X POST "https://validator.schema.org/validate" -d "url=$U/" | sed "s/^)]}'//" | python3 -c 'import json,sys; d=json.load(sys.stdin); print("rendered:",d.get("isRendered"),"objects:",d.get("numObjects"),"types:",[t["value"] for g in d["tripleGroups"] for n in g["nodes"] for t in n["types"]],"totalNumErrors:",d.get("totalNumErrors"),"totalNumWarnings:",d.get("totalNumWarnings"))'
