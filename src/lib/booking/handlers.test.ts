@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { provisionalRules } from "./config.ts";
+import { bookingRules } from "./config.ts";
 import { createBookingHandlers, forwardedAddress } from "./handlers.ts";
 import { RecordingNotifier } from "./notifier.ts";
 import { MemoryRateLimiter } from "./rateLimit.ts";
@@ -15,7 +15,7 @@ function setup(overrides: Partial<Parameters<typeof createBookingHandlers>[0]> =
     store,
     notifier,
     limiter: new MemoryRateLimiter(1000, 10 * 60_000),
-    rules: provisionalRules,
+    rules: bookingRules,
     mode: "instant",
     maxBodyBytes: 8 * 1024,
     now: () => NOW,
@@ -71,7 +71,8 @@ for (const [field, patch, expectKey] of [
   ["bad phone", { phone: "call me" }, "phone"],
   ["invalid date", { date: "2026-02-30" }, "date"],
   ["not a slot time", { time: "12:10" }, "time"],
-  ["too soon", { date: "2026-09-21", time: "09:30" }, "time"],
+  ["too soon", { date: "2026-09-21", time: "09:00" }, "time"],
+  ["after the kitchen closes", { date: "2026-09-22", time: "16:00" }, "time"],
   ["beyond the window", { date: "2026-12-01" }, "date"],
 ] as const) {
   test(`validation failure: ${field} -> 400 with a message on '${expectKey}'`, async () => {
@@ -172,13 +173,12 @@ test("availability lists the slots with room and drops any sitting that would ov
   const url = "http://localhost/api/bookings?date=2026-09-22";
   const before = await (await handlers.GET(new Request(url))).json();
   assert.ok(before.slots.some((s: { time: string }) => s.time === "12:00"));
-  for (let i = 0; i < 6; i++) await handlers.POST(post(good)); // 12:00–13:30 now holds 12 covers
+  for (let i = 0; i < 6; i++) await handlers.POST(post(good)); // 12:00–12:45 now holds 12 covers
   const after = await (await handlers.GET(new Request(url))).json();
   const times = after.slots.map((s: { time: string }) => s.time);
-  for (const t of ["11:00", "11:30", "12:00", "12:30", "13:00"])
-    assert.ok(!times.includes(t), t);
-  assert.ok(times.includes("10:30")); // ends as the full sitting starts
-  assert.ok(times.includes("13:30")); // starts as it ends
+  assert.ok(!times.includes("12:00"));
+  assert.ok(times.includes("11:00")); // ends before the full sitting starts
+  assert.ok(times.includes("13:00")); // starts after it ends
 });
 
 test("availability without a date is a 400", async () => {

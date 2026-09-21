@@ -1,42 +1,35 @@
 /**
- * The rules the booking system runs on.
- *
- * Every figure marked PROVISIONAL is a placeholder chosen so the system can be built and
- * tested. None has been confirmed by the café. They are listed as questions in the pull
- * request that introduced them and must be replaced with the café's answers before the
- * confirmation setting is switched to instant.
+ * The rules the booking system runs on, as confirmed by the café on 2026-09-21. Every
+ * figure here is the café's answer; the reasoning behind the two that were left to us
+ * (the minimum notice and the last seating) is in docs/decisions/0007.
  */
 export interface BookingRules {
-  /** How long a table is held for one party. PROVISIONAL. */
+  /** How long a table is held for one party. */
   sittingMinutes: number;
-  /** Gap between consecutive slot start times. PROVISIONAL. */
+  /** Gap between consecutive slot start times. */
   slotIntervalMinutes: number;
-  /** Seats that may be booked online for any one overlapping sitting. PROVISIONAL. */
+  /** Seats that may be booked online for any one overlapping sitting. */
   coversPerSitting: number;
-  /** Largest party accepted online; larger parties are asked to telephone. PROVISIONAL. */
+  /** Largest party accepted online; larger parties are asked to telephone. */
   maxPartyOnline: number;
-  /** How soon before a sitting a booking may still be made. PROVISIONAL. */
+  /** How soon before a sitting a booking may still be made. */
   minNoticeMinutes: number;
-  /** How many days ahead the calendar opens. PROVISIONAL. */
+  /** How many days ahead the calendar opens. */
   bookingWindowDays: number;
-  /** How long before closing the last sitting may start. PROVISIONAL. */
-  lastSeatingBeforeCloseMinutes: number;
 }
 
-export const provisionalRules: BookingRules = {
-  sittingMinutes: 90,
-  slotIntervalMinutes: 30,
+export const bookingRules: BookingRules = {
+  sittingMinutes: 45,
+  slotIntervalMinutes: 60,
   coversPerSitting: 12,
   maxPartyOnline: 6,
-  minNoticeMinutes: 60,
-  bookingWindowDays: 28,
-  lastSeatingBeforeCloseMinutes: 60,
+  minNoticeMinutes: 30,
+  bookingWindowDays: 7,
 };
 
 /**
  * "instant" is the requirement: the visitor leaves with a confirmed table.
- * "manual" is the interim setting while the rules above are provisional. Switching is the
- * last step of the booking work, done when the café has answered the six questions.
+ * "manual" was the interim setting while the rules above were unconfirmed.
  * Set BOOKING_CONFIRMATION=instant in the environment to switch.
  */
 export type ConfirmationMode = "manual" | "instant";
@@ -66,7 +59,7 @@ export const bookingCopy = {
   },
 } as const;
 
-/** Rate limit for the public endpoint. PROVISIONAL. */
+/** Rate limit for the public endpoint. Ours to set; not a café decision. */
 export const rateLimitRules = { maxRequests: 5, windowMinutes: 10 };
 
 /** Largest request body accepted, in bytes. */

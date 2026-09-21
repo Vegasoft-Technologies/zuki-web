@@ -90,13 +90,14 @@ File: `src/data/openingHours.ts`
 Use the 24-hour clock. Do not change `day` or the order of the lines.
 
 `kitchenCloses` is when the kitchen stops serving food; the café stays open until
-`closes`. It is one figure, set once near the top of the file, because the kitchen closes
-at the same time every day. If that ever differs on one day, write `kitchenCloses:
-hm(15, 0)` on that day's line instead.
+`closes`. It is set per day: 16:00 Monday to Friday and 15:00 on Saturday and Sunday, as
+the café confirmed. The menu note above the menu, the "open now" line and the last
+bookable time all follow it, so a change here changes all three.
 
 Changing a time here changes it in every place at once: the table on the page, the "open
-now" line at the top, the "served all day till" note above the menu, and the information
-search engines read. They cannot disagree with each other.
+now" line at the top, the "served all day till" note above the menu, the times the booking
+form offers, and the information search engines read. They cannot disagree with each
+other.
 
 ## The gallery
 

@@ -6,7 +6,7 @@ import CopyAddress from "@/components/ui/CopyAddress";
 import { site } from "@/data/site";
 import OpeningHoursTable from "@/components/ui/OpeningHoursTable";
 import BookingForm from "@/components/sections/BookingForm";
-import { confirmationMode, provisionalRules } from "@/lib/booking/config";
+import { confirmationMode, bookingRules } from "@/lib/booking/config";
 import { templateTimes } from "@/lib/booking/slots";
 
 export default function Visit() {
@@ -56,9 +56,9 @@ export default function Visit() {
             <h3>Book a table</h3>
             <BookingForm
               mode={confirmationMode()}
-              maxPartyOnline={provisionalRules.maxPartyOnline}
-              templateTimes={templateTimes(provisionalRules)}
-              windowDays={provisionalRules.bookingWindowDays}
+              maxPartyOnline={bookingRules.maxPartyOnline}
+              templateTimes={templateTimes(bookingRules)}
+              windowDays={bookingRules.bookingWindowDays}
             />
           </div>
         </Reveal>

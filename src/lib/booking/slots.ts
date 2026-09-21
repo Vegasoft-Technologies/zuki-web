@@ -35,13 +35,26 @@ export function hoursFor(date: DateParts): DayHours | undefined {
   return openingHours.find((d) => d.day === weekday);
 }
 
-/** Every slot start time on a date, in minutes past midnight, ignoring notice and window. */
+/**
+ * Every slot start time on a date, in minutes past midnight, ignoring notice and window.
+ * The last bookable slot is the latest one whose sitting finishes before the kitchen
+ * closes, so a guest never sits down to find no food (docs/decisions/0007).
+ */
 export function daySlotTimes(date: DateParts, rules: BookingRules): number[] {
   const hours = hoursFor(date);
   if (!hours) return [];
-  const last = hours.closes - rules.lastSeatingBeforeCloseMinutes;
+  return slotTimesFor(hours, rules);
+}
+
+function slotTimesFor(hours: DayHours, rules: BookingRules): number[] {
   const times: number[] = [];
-  for (let t = hours.opens; t <= last; t += rules.slotIntervalMinutes) times.push(t);
+  for (
+    let t = hours.opens;
+    t + rules.sittingMinutes <= hours.kitchenCloses;
+    t += rules.slotIntervalMinutes
+  ) {
+    times.push(t);
+  }
   return times;
 }
 
@@ -113,10 +126,7 @@ export function availableSlots(
  */
 export function templateTimes(rules: BookingRules): string[] {
   const set = new Set<number>();
-  for (const day of openingHours) {
-    const last = day.closes - rules.lastSeatingBeforeCloseMinutes;
-    for (let t = day.opens; t <= last; t += rules.slotIntervalMinutes) set.add(t);
-  }
+  for (const day of openingHours) for (const t of slotTimesFor(day, rules)) set.add(t);
   return [...set].sort((a, b) => a - b).map(formatTime);
 }
 
@@ -129,7 +139,7 @@ export function describeProblem(problem: SlotProblem, rules: BookingRules): stri
     case "closed-that-day":
       return "We are closed that day.";
     case "outside-hours":
-      return "That time is outside the hours we take bookings for.";
+      return "That time is outside the hours we take bookings for — the last sitting starts before the kitchen closes.";
     case "not-a-slot-time":
       return `Bookings start every ${rules.slotIntervalMinutes} minutes — please pick one of the listed times.`;
     case "too-soon":
