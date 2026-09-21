@@ -24,6 +24,17 @@
       "bucket_name": "zuki-web-cache",
     },
   ],
+  // Bookings. The database is created once in the account (docs/access.md); its identifier
+  // below is filled in then. Schema changes are files in migrations/, applied with
+  // `wrangler d1 migrations apply DB` (add --local for development).
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "zuki-web-bookings",
+      "database_id": "to-be-created",
+      "migrations_dir": "migrations",
+    },
+  ],
   // Time-based revalidation is queued through a Durable Object, which deduplicates
   // concurrent revalidations of the same page. SQLite-backed, so it is on the free plan.
   "durable_objects": {

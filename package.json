@@ -10,6 +10,7 @@
     "build": "next build",
     "start": "next start",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
