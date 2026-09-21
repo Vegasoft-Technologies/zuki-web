@@ -53,8 +53,8 @@ function liveStore(): BookingStore {
     return chosen;
   };
   return {
-    coversDuring: (date, startsAt, endsAt) =>
-      store().coversDuring(date, startsAt, endsAt),
+    coversDuring: (date, startsAt, endsAt, area) =>
+      store().coversDuring(date, startsAt, endsAt, area),
     reserve: (request, capacity) => store().reserve(request, capacity),
     list: (date) => store().list(date),
   };

@@ -7,6 +7,7 @@ const booking: BookingRecord = {
   id: "bk-test-1",
   name: "Ada Lovelace",
   partySize: 4,
+  area: "inside",
   slot: {
     date: "2026-09-26",
     time: "12:30",
@@ -23,12 +24,13 @@ test("the notice carries every field and says the booking awaits confirmation", 
   const { subject, text } = renderNotice(booking, "manual");
   assert.equal(
     subject,
-    "Table request: Saturday 26 September 2026, 12:30, party of 4 — awaiting confirmation",
+    "Table request: Saturday 26 September 2026, 12:30, party of 4, inside — awaiting confirmation",
   );
   for (const expected of [
     "AWAITING CONFIRMATION",
     "Name:        Ada Lovelace",
     "Party size:  4",
+    "Area:        Inside",
     "Date:        Saturday 26 September 2026",
     "Time:        12:30",
     "Telephone:   +44 1392 000000",
@@ -116,4 +118,17 @@ test("a provider error or an unreachable provider is logged and never thrown", a
   assert.equal(errors.length, 2);
   assert.match(errors[0], /notification failed for bk-test-1 .* 401/);
   assert.match(errors[1], /notification failed for bk-test-1 .* ECONNREFUSED/);
+});
+
+test("the area is on its own line, the subject names it, and the weather note appears only for outside", () => {
+  const inside = renderNotice(booking, "manual");
+  assert.match(inside.subject, /, inside — /);
+  assert.ok(!inside.text.includes("weather"));
+  const outside = renderNotice({ ...booking, area: "outside" }, "manual");
+  assert.match(outside.subject, /, outside — /);
+  assert.ok(
+    outside.text.includes(
+      "Area:        Outside — Our outside tables are under the open sky, so they depend on the weather on the day.",
+    ),
+  );
 });

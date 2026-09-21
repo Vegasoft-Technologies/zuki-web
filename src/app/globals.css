@@ -1122,3 +1122,17 @@ a:focus-visible, button:focus-visible, .menu__tab:focus-visible {
 .hours__kitchen { display: block; font-size: 0.8em; font-weight: 400; color: var(--ink-soft); }
 .hours tr.is-today .hours__kitchen { color: var(--teal-700); }
 .hero__status-kitchen { white-space: nowrap; }
+
+/* Seating area choice on the booking form. Added with the seating-areas change. Two radio
+   options drawn as the site's small buttons; each label is the target, at least 44px high. */
+.booking__areas { border: 0; padding: 0; margin: 0; display: grid; gap: 0.35rem; }
+.booking__area-options { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.booking__area {
+  display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; padding: 0 1rem;
+  border: 1.5px solid var(--line); border-radius: 999px; background: rgba(255, 255, 255, 0.6);
+  font-weight: 600; color: var(--ink); cursor: pointer;
+}
+.booking__area input { margin: 0; width: 18px; height: 18px; accent-color: var(--teal-700); }
+.booking__area:has(input:checked) { border-color: var(--teal-700); background: rgba(12, 74, 71, 0.08); }
+.booking__area:has(input:focus-visible) { outline: 3px solid var(--gold); outline-offset: 2px; }
+.booking__areas[data-invalid="true"] .booking__area { border-color: var(--poppy); }

@@ -1,3 +1,4 @@
+import type { Area } from "./config.ts";
 import type { Slot } from "./slots.ts";
 import type {
   BookingRecord,
@@ -26,6 +27,7 @@ interface Row {
   id: string;
   name: string;
   party_size: number;
+  area: Area;
   date: string;
   time: string;
   starts_at: number;
@@ -37,21 +39,29 @@ interface Row {
   created_at: number;
 }
 
-// Covers already booked on a date whose sitting overlaps a window: one that starts before
-// the window ends and ends after it starts. D1 takes numbered parameters, so the caller
-// says which parameter holds the date, the window's end and its start.
-const overlappingCovers = (date: number, endsAt: number, startsAt: number) => `
+// Covers already booked in one area on a date whose sitting overlaps a window: one that
+// starts before the window ends and ends after it starts. D1 takes numbered parameters,
+// so the caller says which parameter holds the date, the area, the window's end and its
+// start.
+const overlappingCovers = (
+  date: number,
+  area: number,
+  endsAt: number,
+  startsAt: number,
+) => `
   COALESCE((
     SELECT SUM(party_size) FROM bookings
-    WHERE date = ?${date} AND starts_at < ?${endsAt} AND ?${startsAt} < ends_at
+    WHERE date = ?${date} AND area = ?${area} AND starts_at < ?${endsAt} AND ?${startsAt} < ends_at
   ), 0)`;
 
 /**
  * Bookings in Cloudflare D1. The capacity check in `reserve` is one SQL statement: an
- * INSERT whose SELECT produces a row only while the party still fits. SQLite runs a
- * statement atomically under the database's single write lock, so two visitors taking
- * the last covers at the same moment cannot both see room; the second INSERT evaluates
- * its subquery after the first has committed and inserts nothing.
+ * INSERT whose SELECT produces a row only while the party still fits in its area. SQLite
+ * runs a statement atomically under the database's single write lock, so two visitors
+ * taking the last covers in the same area at the same moment cannot both see room; the
+ * second INSERT evaluates its subquery after the first has committed and inserts nothing.
+ * The subquery is keyed on the slot and the area together, so an inside booking never
+ * consumes an outside seat.
  */
 export class D1BookingStore implements BookingStore {
   private readonly db: D1Like;
@@ -60,10 +70,15 @@ export class D1BookingStore implements BookingStore {
     this.db = db;
   }
 
-  async coversDuring(date: string, startsAt: Date, endsAt: Date): Promise<number> {
+  async coversDuring(
+    date: string,
+    startsAt: Date,
+    endsAt: Date,
+    area: Area,
+  ): Promise<number> {
     const row = await this.db
-      .prepare(`SELECT ${overlappingCovers(1, 2, 3)} AS covers`)
-      .bind(date, endsAt.getTime(), startsAt.getTime())
+      .prepare(`SELECT ${overlappingCovers(1, 2, 3, 4)} AS covers`)
+      .bind(date, area, endsAt.getTime(), startsAt.getTime())
       .first<{ covers: number }>();
     return row?.covers ?? 0;
   }
@@ -75,9 +90,9 @@ export class D1BookingStore implements BookingStore {
     const result = await this.db
       .prepare(
         `INSERT INTO bookings
-           (id, name, party_size, date, time, starts_at, ends_at, phone, email, note, status, created_at)
-         SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12
-         WHERE ?3 + ${overlappingCovers(4, 7, 6)} <= ?13`,
+           (id, name, party_size, area, date, time, starts_at, ends_at, phone, email, note, status, created_at)
+         SELECT ?1, ?2, ?3, ?14, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12
+         WHERE ?3 + ${overlappingCovers(4, 14, 7, 6)} <= ?13`,
       )
       .bind(
         id,
@@ -93,13 +108,19 @@ export class D1BookingStore implements BookingStore {
         request.status,
         createdAt.getTime(),
         capacity,
+        request.area,
       )
       .run();
 
     if (result.meta.changes === 1) {
       return { ok: true, booking: { ...request, id, createdAt } };
     }
-    const used = await this.coversDuring(slot.date, slot.startsAt, slot.endsAt);
+    const used = await this.coversDuring(
+      slot.date,
+      slot.startsAt,
+      slot.endsAt,
+      request.area,
+    );
     return { ok: false, reason: "full", remaining: Math.max(0, capacity - used) };
   }
 
@@ -123,6 +144,7 @@ function fromRow(row: Row): BookingRecord {
     id: row.id,
     name: row.name,
     partySize: row.party_size,
+    area: row.area,
     slot,
     contact: {
       ...(row.phone ? { phone: row.phone } : {}),

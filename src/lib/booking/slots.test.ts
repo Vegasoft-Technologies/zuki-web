@@ -112,9 +112,15 @@ const slotOn = (date: string, time: string) => {
   if (!c.ok) throw new Error(`test slot invalid: ${c.problem}`);
   return c.slot;
 };
-const party = (n: number, date: string, time: string) => ({
+const party = (
+  n: number,
+  date: string,
+  time: string,
+  area: "inside" | "outside" = "inside",
+) => ({
   name: "Test",
   partySize: n,
+  area,
   slot: slotOn(date, time),
   contact: { phone: "+44 1392 000000" },
   status: "confirmed" as const,
@@ -155,5 +161,27 @@ test("londonToInstant handles the clocks going forward", () => {
   assert.equal(
     londonToInstant(2026, 3, 29, 9 * 60).toISOString(),
     "2026-03-29T08:00:00.000Z",
+  );
+});
+
+test("capacity is counted per area: inside full does not touch outside, and the reverse", async () => {
+  const store = new InMemoryBookingStore();
+  await store.reserve(party(12, "2026-09-24", "12:00", "inside"), 12); // inside full
+  assert.equal(
+    (await store.reserve(party(1, "2026-09-24", "12:00", "inside"), 12)).ok,
+    false,
+  );
+  assert.equal(
+    (await store.reserve(party(1, "2026-09-24", "12:00", "outside"), 15)).ok,
+    true,
+  );
+  await store.reserve(party(15, "2026-09-25", "12:00", "outside"), 15); // outside full
+  assert.equal(
+    (await store.reserve(party(1, "2026-09-25", "12:00", "outside"), 15)).ok,
+    false,
+  );
+  assert.equal(
+    (await store.reserve(party(1, "2026-09-25", "12:00", "inside"), 12)).ok,
+    true,
   );
 });
