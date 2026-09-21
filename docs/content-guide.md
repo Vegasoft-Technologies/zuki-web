@@ -113,7 +113,9 @@ File: `src/data/gallery.ts`
   the grid. Leave it out for a normal square.
 
 To add a photograph, put the file in `public/images/`, then add a line at the top of the
-file that reads it, copying one of the existing lines and changing the file name.
+file that reads it, copying one of the existing lines and changing the file name. Then
+run `npm run images:formats`, which writes the smaller and lighter copies the site serves
+(it only writes what is missing), and commit those files with the photograph.
 
 ## Telephone, address and links
 

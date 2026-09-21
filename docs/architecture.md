@@ -11,6 +11,7 @@ src/
 │   ├── layout.tsx           html and body, fonts, global CSS, JSON-LD, header, footer
 │   ├── page.tsx             the home page: composes the section components
 │   ├── privacy/page.tsx     the privacy and cookie policy
+│   ├── img/[file]/route.ts  serves a pre-generated image in the format the browser accepts
 │   ├── sitemap.ts           generates /sitemap.xml
 │   └── globals.css          the production stylesheet, moved and never edited in place
 ├── components/
@@ -25,7 +26,21 @@ src/
 `reference/` sits outside `src/` and holds a byte-exact copy of the production site with
 screenshots at three widths. It is the yardstick for appearance and is never edited.
 
-`public/images/` holds the original image files under their original names.
+`public/images/` holds the original image files under their original names, and beside
+each one the copies the site actually serves: an AVIF and a WebP at the original size,
+and resized copies in all three formats at the widths in `src/lib/imageVariants.ts`.
+`npm run images:formats` writes them.
+
+## How an image is served
+
+The site runs on Cloudflare Workers, which has no Node runtime, so Next's own image
+optimiser is not available. Instead every `next/image` goes through a loader
+(`src/lib/imageLoader.ts`) that turns a request for a source image at a width into the
+address of a pre-generated file, `/img/<name>-<width>.<ext>`. The `/img` route reads the
+browser's `Accept` header, serves the AVIF or WebP copy if it can and the original
+format if not, and marks the response `Vary: Accept` and cacheable for a year — the
+address carries the file's content hash, so it changes when the file does. The result
+is that a phone receives a 384-pixel AVIF where it used to receive a 1440-pixel JPEG.
 
 ## How a request renders
 

@@ -14,7 +14,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "node --test \"src/**/*.test.ts\"",
-    "images:formats": "node scripts/generate-image-formats.mjs"
+    "images:formats": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-image-formats.mjs"
   },
   "dependencies": {
     "next": "16.3.5",
