@@ -3,7 +3,7 @@ import type { BookingRecord } from "./store.ts";
 
 /**
  * How the café hears about a booking. The logging notifier is for development and tests;
- * a transactional email notifier is added when hosting is settled. Personal details are
+ * production sends email through Resend (`resendNotifier.ts`). Personal details are
  * deliberately not logged.
  */
 export interface Notifier {

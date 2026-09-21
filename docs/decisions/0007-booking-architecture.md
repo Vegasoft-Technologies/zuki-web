@@ -58,6 +58,14 @@ is added with hosting. Email rather than SMS to start: it costs nothing per mess
 carries the full booking, and the café already publishes an email address. SMS can be a
 second notifier later if the café wants it.
 
+**Amendment, 2026-09-21.** The email notifier is in place, through Resend. **The address
+it notifies is an internal one until go-live**, set by the deployment secret
+`BOOKING_NOTIFY_TO`; the café's address is written into no file, test, default or
+fallback. Switching that secret to the café is a deliberate step taken together with
+enabling instant confirmation, on the day the café has answered the provisional
+questions, and not before. The sending domain receives no mail, so every notice carries
+Reply-To set to the notified address.
+
 ### Confirmation: instant is the requirement; manual is the interim setting
 
 The requirement is **instant confirmation**: the visitor picks a slot, submits, and

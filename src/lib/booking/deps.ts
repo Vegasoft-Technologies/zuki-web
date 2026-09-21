@@ -8,7 +8,8 @@ import {
 import { D1RateLimiter } from "./d1RateLimit.ts";
 import { D1BookingStore, type D1Like } from "./d1Store.ts";
 import { type Deps, edgeAddress, forwardedAddress } from "./handlers.ts";
-import { LogNotifier } from "./notifier.ts";
+import { LogNotifier, type Notifier } from "./notifier.ts";
+import { ResendNotifier } from "./resendNotifier.ts";
 import { MemoryRateLimiter, type RateLimiter } from "./rateLimit.ts";
 import { type BookingStore, InMemoryBookingStore } from "./store.ts";
 
@@ -85,15 +86,44 @@ function liveClientAddress(request: Request): string | null {
 }
 
 /**
- * The services the live endpoint runs on. The store and the rate limiter are D1; the
- * notifier is still the logging one (see docs/decisions/0007).
+ * Email through Resend when the three values are present; otherwise the logging notifier,
+ * with a warning, so a missing value is noticed rather than silently swallowing notices.
+ * Read on the first request, because on Cloudflare the secrets are copied into
+ * process.env when the Worker starts.
+ */
+function liveNotifier(): Notifier {
+  let chosen: Notifier | undefined;
+  const notifier = (): Notifier => {
+    if (chosen) return chosen;
+    const {
+      RESEND_API_KEY: apiKey,
+      BOOKING_NOTIFY_TO: to,
+      BOOKING_NOTIFY_FROM: from,
+    } = process.env;
+    if (apiKey && to && from) chosen = new ResendNotifier({ apiKey, to, from });
+    else {
+      console.warn(
+        "[booking] RESEND_API_KEY, BOOKING_NOTIFY_TO or BOOKING_NOTIFY_FROM is not set: booking notices are only logged.",
+      );
+      chosen = new LogNotifier();
+    }
+    return chosen;
+  };
+  return {
+    bookingReceived: (booking, mode) => notifier().bookingReceived(booking, mode),
+  };
+}
+
+/**
+ * The services the live endpoint runs on: the store and the rate limiter in D1, the
+ * notifier by email (see docs/decisions/0007).
  */
 let shared: Deps | undefined;
 
 export function defaultDeps(): Deps {
   shared ??= {
     store: liveStore(),
-    notifier: new LogNotifier(),
+    notifier: liveNotifier(),
     limiter: liveLimiter(),
     clientAddress: liveClientAddress,
     rules: provisionalRules,
