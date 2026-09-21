@@ -197,6 +197,20 @@ by email to the café — and `/privacy` is updated in the same pull request as 
 - A honeypot field that must arrive empty.
 - A cap on the request body size, enforced before parsing.
 
+## Hard precondition for the real domain
+
+With instant confirmation on, a guest who books receives a confirmed table. The notice
+of that booking goes to `BOOKING_NOTIFY_TO`, which is still an internal address, not the
+café's. A real guest could therefore hold a confirmed table while the café learned nothing
+about it. That is safe only while the site lives at its `workers.dev` address, which no
+customer will find.
+
+**The real domain must not be connected until `BOOKING_NOTIFY_TO` points at the café.**
+Connecting the domain and switching that secret are a single go-live step, taken
+together with anything else outstanding at the time (`docs/access.md` lists what is).
+Neither is done on its own. The same line stands in `docs/access.md`, so it is not
+recorded in one place only.
+
 ## Consequences
 
 - The feature can be built, tested and reviewed end to end now, against the in-memory

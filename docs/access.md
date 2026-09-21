@@ -48,6 +48,15 @@ Key. A token can be revoked in one click; a password cannot be revoked without l
 everyone out. If the token is ever exposed, revoke it, issue a new one with the same
 scope, and replace the repository secret.
 
+## Go-live gate
+
+**The real domain must not be connected until `BOOKING_NOTIFY_TO` points at the café.**
+Bookings confirm instantly, and their notices go to an internal address until then; a
+guest could hold a confirmed table the café knows nothing about. Connecting the domain and
+switching that secret are one go-live step, together with whatever else is outstanding
+(the second administrators, the DMARC policy, the Clarity project). Recorded in
+`docs/decisions/0007` as well.
+
 ## Handover
 
 **Handover.** This project has its own Cloudflare account, separate from any personal
