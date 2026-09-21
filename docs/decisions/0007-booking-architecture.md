@@ -124,6 +124,17 @@ by email to the café — and `/privacy` is updated in the same pull request as 
 - Rate limiting by address, behind an interface for the same reason as the store: an
   in-memory bucket is correct on one process and wrong on serverless, so the production
   limiter is chosen with hosting.
+
+  **Amendment, 2026-09-21.** On the deployed Worker the in-memory limiter never
+  triggered: each isolate kept its own tally. The production limiter now counts in D1
+  (`rate_limit_hits`, migration `0002`), with one guarded `INSERT` that both decides and
+  records, so every isolate sees the same count and a burst cannot slip past it. D1 rather
+  than KV because KV permits one write per second per key and is eventually consistent,
+  and a limiter needs an exact, immediate count. The caller's address is read only from
+  `CF-Connecting-IP`, which the edge sets and a caller cannot forge; a request without it
+  is refused rather than keyed on a header the caller supplied. The in-memory limiter
+  remains behind the same interface for the tests and local development.
+
 - A honeypot field that must arrive empty.
 - A cap on the request body size, enforced before parsing.
 

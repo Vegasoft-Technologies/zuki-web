@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { provisionalRules } from "./config.ts";
-import { createBookingHandlers } from "./handlers.ts";
+import { createBookingHandlers, forwardedAddress } from "./handlers.ts";
 import { RecordingNotifier } from "./notifier.ts";
 import { MemoryRateLimiter } from "./rateLimit.ts";
 import { InMemoryBookingStore } from "./store.ts";
@@ -19,6 +19,7 @@ function setup(overrides: Partial<Parameters<typeof createBookingHandlers>[0]> =
     mode: "instant",
     maxBodyBytes: 8 * 1024,
     now: () => NOW,
+    clientAddress: forwardedAddress,
     ...overrides,
   });
   return { store, notifier, handlers };
@@ -186,4 +187,20 @@ test("availability without a date is a 400", async () => {
     (await handlers.GET(new Request("http://localhost/api/bookings"))).status,
     400,
   );
+});
+
+test("without a trustworthy address the request is refused, not keyed on a supplied header", async () => {
+  const { store, handlers } = setup({ clientAddress: undefined });
+  const res = await handlers.POST(post(good)); // carries x-forwarded-for, which is not trusted
+  assert.equal(res.status, 400);
+  assert.match((await res.json()).error, /where this request came from/);
+  assert.equal((await store.list(good.date)).length, 0);
+});
+
+test("with the edge's address the request goes through, whatever a forwarding header says", async () => {
+  const { handlers } = setup({ clientAddress: undefined });
+  const res = await handlers.POST(
+    post(good, { "cf-connecting-ip": "203.0.113.50", "x-forwarded-for": "198.51.100.1" }),
+  );
+  assert.equal(res.status, 201);
 });

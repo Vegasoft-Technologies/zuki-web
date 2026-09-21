@@ -14,18 +14,31 @@ export interface Deps {
   maxBodyBytes: number;
   /** Injectable so tests can pin the clock. */
   now?: () => Date;
+  /**
+   * Where the caller's address comes from. The default reads the header Cloudflare's
+   * edge sets and a caller cannot forge; a request without it is refused rather than
+   * keyed on something the caller supplied. Tests and local development, which have no
+   * edge in front of them, pass `forwardedAddress` instead.
+   */
+  clientAddress?: (request: Request) => string | null;
 }
+
+/** The address as Cloudflare's edge reports it. Null when there is no edge in front. */
+export const edgeAddress = (request: Request): string | null =>
+  request.headers.get("cf-connecting-ip")?.trim() || null;
+
+/**
+ * The address from a forwarding header. Only for tests and local development: a caller
+ * can write this header, so it must never be trusted on the deployed site.
+ */
+export const forwardedAddress = (request: Request): string | null =>
+  request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
 
 const json = (body: unknown, status = 200, headers: Record<string, string> = {}) =>
   new Response(JSON.stringify(body), {
     status,
     headers: { "content-type": "application/json; charset=utf-8", ...headers },
   });
-
-const clientAddress = (request: Request) =>
-  request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-  request.headers.get("x-real-ip") ||
-  "unknown";
 
 /** A plain HTML form post, as opposed to the scripted JSON request. */
 const wantsHtml = (request: Request) =>
@@ -49,6 +62,7 @@ const firstError = (errors: FieldErrors) =>
  */
 export function createBookingHandlers(deps: Deps) {
   const now = deps.now ?? (() => new Date());
+  const clientAddress = deps.clientAddress ?? edgeAddress;
 
   async function GET(request: Request): Promise<Response> {
     const date = new URL(request.url).searchParams.get("date") ?? "";
@@ -98,7 +112,15 @@ export function createBookingHandlers(deps: Deps) {
       return html ? redirect(request, { status: "received" }) : json({ ok: true }, 200);
     }
 
-    if (!deps.limiter.allow(clientAddress(request), now().getTime())) {
+    const address = clientAddress(request);
+    if (address === null) {
+      // No trustworthy address means no way to apply the limit; refuse rather than guess.
+      const message = "We could not tell where this request came from. Please try again.";
+      return html
+        ? redirect(request, { status: "error", message })
+        : json({ ok: false, error: message }, 400);
+    }
+    if (!(await deps.limiter.allow(address, now().getTime()))) {
       return html
         ? redirect(request, {
             status: "error",
