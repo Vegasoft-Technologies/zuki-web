@@ -1,4 +1,3 @@
-import { menu } from "@/data/menu";
 import { formatTime, openingHours } from "@/data/openingHours";
 import { site } from "@/data/site";
 
@@ -26,34 +25,6 @@ function openingHoursSpecification() {
 }
 
 /**
- * The cheapest and dearest things on the menu, derived rather than written down so it
- * cannot drift from the prices the page shows.
- *
- * Supplements are left out. A "+£0.50" for sprinkles is a modifier to another item's
- * price, not something anyone can buy on its own, and counting it would claim the cafe
- * serves food from 50p.
- */
-function priceRange(): string {
-  const items = menu
-    .flatMap((category) => category.groups.flatMap((group) => group.items))
-    .filter((item) => item.amount !== undefined && !item.price?.startsWith("+"))
-    .map((item) => item.amount as number);
-
-  const features = menu
-    .flatMap((category) =>
-      category.feature ? [category.feature.price, category.feature.priceAlt] : [],
-    )
-    .filter((price): price is string => Boolean(price))
-    .flatMap((price) =>
-      [...price.matchAll(/£\s?(\d+(?:\.\d+)?)/g)].map((match) => Number(match[1])),
-    );
-
-  const amounts = [...items, ...features];
-  const money = (value: number) => `£${value.toFixed(2)}`;
-  return `${money(Math.min(...amounts))}–${money(Math.max(...amounts))}`;
-}
-
-/**
  * Builds the CafeOrCoffeeShop record from the same data the page renders, so the two
  * can never disagree.
  */
@@ -68,7 +39,7 @@ export function buildStructuredData(): Record<string, unknown> {
     "@id": `${site.url}/`,
     url: `${site.url}/`,
     telephone: site.telephone,
-    priceRange: priceRange(),
+    priceRange: "££",
     menu: `${site.url}/#menu`,
     hasMenu: `${site.url}/#menu`,
     servesCuisine: ["Italian", "Turkish", "Breakfast", "Brunch", "Coffee"],
