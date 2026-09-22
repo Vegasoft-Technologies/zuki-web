@@ -62,16 +62,20 @@ the ICO by name with its website and telephone number; both suppliers in the "wh
 it" bullet; and, for the note, that choosing to write it is treated as explicit consent
 for that one booking under Article 9(2)(a), with a reminder that it can be left empty.
 
+**Amendment, 2026-09-22: a written contact route, and a correction.** The first version
+of this record left the policy without an email address, on the grounds that the only
+address configured for booking notices was the repository owner's own. That was wrong.
+`BOOKING_NOTIFY_TO` has held the café's address since 2026-09-21: it was set on the live
+Worker from the owner's environment file during the move into the account that holds the
+domain, and the value there is the café's. Article 12 asks that rights requests be made
+easy, and a telephone call or an Instagram message leaves the person no record, so the
+policy now gives that address beside the telephone number and Instagram, and names email
+in both places where it says how to ask about your data. The address is written once, in
+`src/data/site.ts`, as the café's public contact. The notifier does not read it and still
+has no default or fallback, so the rule in `0007` about the notification address holds.
+
 ## What is still open
 
-- **A written contact route.** Article 12 asks that rights requests be made easy, and the
-  policy still offers only a telephone number and Instagram — neither leaves the person a
-  record. It should offer an email address, and that address must be the café's. The only
-  address configured for booking notices is the repository owner's own, kept internal on
-  purpose until the café takes the notices over (`0007`, amendment of 2026-09-21), and
-  publishing an agency address as the café's would be wrong. The café's own address is in
-  no file here, by design. This disclosure waits on that address and is a small change
-  when it arrives.
 - **Naming the place.** If the café wants its customers' bookings kept in a particular
   place, that is a database created with a location hint and the rows moved to it — a
   deliberate piece of work, not a setting. The sentence above can name the place on the
