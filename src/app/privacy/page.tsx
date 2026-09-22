@@ -16,7 +16,7 @@ export default function PrivacyPage() {
         ← Back to Zuki&apos;s
       </Link>
       <h1>Privacy &amp; Cookie Policy</h1>
-      <p className="legal__updated">Last updated: 21 September 2026</p>
+      <p className="legal__updated">Last updated: 22 September 2026</p>
 
       <p>
         This policy explains how <strong>Zuki&apos;s Caffetteria</strong> (&quot;we&quot;,
@@ -57,7 +57,9 @@ export default function PrivacyPage() {
           allergy, a dietary need or an accessibility need, which is health information.
           We use it only to serve that one booking — to prepare your table and your food —
           and for nothing else. It is not copied anywhere, and it is deleted with the rest
-          of the booking, 30 days after the date of your visit.
+          of the booking, 30 days after the date of your visit. Because you choose to
+          write it, we treat that as your explicit consent to use it for this one booking
+          (UK GDPR, Article 9(2)(a)). You can leave the note empty.
         </li>
         <li>
           <strong>Lawful basis:</strong> the booking is a step towards a contract you have
@@ -69,8 +71,16 @@ export default function PrivacyPage() {
           then it is deleted.
         </li>
         <li>
-          <strong>Who sees it:</strong> the café, and the service that delivers the
-          booking notice to us, which acts only on our instructions. Nobody else.
+          <strong>Who sees it:</strong> the café. Two suppliers handle it for us and only
+          on our instructions — the provider that hosts this website and stores the
+          booking, and the provider that delivers the booking notice to us. Nobody else.
+        </li>
+        <li>
+          <strong>Where it is kept:</strong> your booking is stored by the provider that
+          hosts this website, and the notice is delivered by our email provider. Both may
+          hold it on servers outside the United Kingdom. Where that happens it is covered
+          by contractual protections that UK law recognises as giving your information the
+          same standard of protection it would have here.
         </li>
         <li>
           <strong>Your choices:</strong> to see, correct or delete a booking&apos;s
@@ -124,6 +134,15 @@ export default function PrivacyPage() {
         have it deleted. The only personal data this website holds is a table booking,
         described above. If you&apos;ve contacted us directly (by phone or Instagram) and
         want us to remove your details, get in touch and we&apos;ll sort it out.
+      </p>
+      <p>
+        If you think we have handled your information badly, please tell us first — we
+        would like the chance to put it right. You can also complain to the Information
+        Commissioner&apos;s Office, the UK&apos;s data protection regulator, at{" "}
+        <a href="https://ico.org.uk" target="_blank" rel="noopener">
+          ico.org.uk
+        </a>{" "}
+        or on 0303 123 1113.
       </p>
 
       <h2>Changes to this policy</h2>
