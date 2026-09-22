@@ -15,6 +15,11 @@ export const site = {
   },
   telephone: "+441392666999",
   telephoneDisplay: "+44 1392 666999",
+  /**
+   * The café's own email, for visitors. Booking notices do not read it: they go to the
+   * BOOKING_NOTIFY_TO secret, which has no default.
+   */
+  email: "Zukiscafe64@gmail.com",
   geo: {
     latitude: 50.7259,
     longitude: -3.5318,

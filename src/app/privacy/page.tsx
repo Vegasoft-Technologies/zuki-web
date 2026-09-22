@@ -30,12 +30,16 @@ export default function PrivacyPage() {
         {site.name}, {site.address.street}, {site.address.locality}{" "}
         {site.address.postcode}, {site.address.country}.
         <br />
-        Phone: <a href={`tel:${site.telephone}`}>{site.telephoneDisplay}</a> · Instagram:{" "}
+        Phone: <a href={`tel:${site.telephone}`}>{site.telephoneDisplay}</a> · Email:{" "}
+        <a href={`mailto:${site.email}`}>{site.email}</a> · Instagram:{" "}
         <a href={site.social.instagram} target="_blank" rel="noopener">
           @zukiscaffetteria
         </a>
       </p>
-      <p>For any privacy question, just call us or message us on Instagram.</p>
+      <p>
+        For any privacy question — including to see, correct or delete what we hold about
+        you — call us, email us, or message us on Instagram.
+      </p>
 
       <h2>Booking a table</h2>
       <p>
@@ -84,7 +88,7 @@ export default function PrivacyPage() {
         </li>
         <li>
           <strong>Your choices:</strong> to see, correct or delete a booking&apos;s
-          details, call us or message us on Instagram and we will do it.
+          details, call us, email us or message us on Instagram and we will do it.
         </li>
       </ul>
 
